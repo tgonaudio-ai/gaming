@@ -2,7 +2,7 @@
 // Core simulation: player, sharks, puzzles, progression. Rendering lives in render.js, DOM HUD in hud.js.
 (() => {
   const { clamp, lerp, dist, rand, angDiff, segHitsCircle, inRect } = G;
-  const PR = 16, SWIM = 190, DASH_SPD = 480, DASH_T = 0.28, DASH_CD = 1.1;
+  const PR = 20, SWIM = 190, DASH_SPD = 480, DASH_T = 0.28, DASH_CD = 1.1;
 
   const g = G.game = {
     status: 'menu', li: 0, time: 0, abilities: new Set(), memories: new Set(), parts: [], say: null, shake: 0, flash: 0, threat: 0, fade: 0
@@ -29,11 +29,17 @@
     g.mem = lv.memories.map((m, i) => Object.assign({ id: li + ':' + i, got: g.memories.has(li + ':' + i) }, m));
     g.sharks = (lv.sharks || []).map(s => ({
       x: s.path[0][0], y: s.path[0][1], ang: 0, state: 'patrol', pi: 1, speed: s.speed, chase: s.chase, hunter: !!s.hunter, guardian: !!s.guardian, path: s.path,
-      timer: 0, lost: 0, stun: 0, calm: 0, tx: 0, ty: 0, wig: Math.random() * 6
+      timer: 0, lost: 0, stun: 0, calm: 0, tx: 0, ty: 0, wig: Math.random() * 6, off: Math.random() * 5
     }));
     g.ghost = lv.ghostShark ? { x: lv.ghostShark.path[0][0], y: lv.ghostShark.path[0][1], ang: 0, pi: 1, path: lv.ghostShark.path, speed: lv.ghostShark.speed } : null;
     g.bottle = { x: lv.bottle[0][0], y: lv.bottle[0][1], ready: true, veil: 0 };
     g.cam = { x: p[0], y: p[1], zoom: 1 };
+    g.rescue = null; g.DASH_T = DASH_T;
+    const i0 = lv.islands[0];
+    g.boat = { x: i0.x + i0.r * 0.95, y: i0.y, ang: 0 };
+    g.p.lastWater = { x: i0.x + i0.r * 2, y: i0.y };
+    g.p.wasSafe = true;
+    g.dolphin = li >= 1 ? { x: p[0] + 300, y: p[1] - 220, ang: 0, jump: 0, jumpCd: rand(4, 8), off: rand(0, 6), friend: li >= 3, seen: false } : null;
     g.token = (g.token || 0) + 1;
     const tok = g.token;
     G.ui.onLevelStart && G.ui.onLevelStart(lv, li);
@@ -97,19 +103,28 @@
     if (p.courage <= 0) g.respawn();
     return true;
   };
+  // Dolphin pulls the player out of trouble; the teleport happens mid-scene.
   g.respawn = function () {
-    const p = g.p; p.x = g.checkpoint.x; p.y = g.checkpoint.y; p.vx = p.vy = 0; p.courage = 100; p.breath = 100; p.invuln = 2; g.fade = 1;
+    if (g.status !== 'play') return;
+    g.status = 'rescue'; g.rescue = { t: 0, moved: false, x: g.p.x, y: g.p.y };
+    g.p.vx = g.p.vy = 0; g.p.invuln = 4; g.p.courage = 100; g.p.breath = 100;
     g.sharks.forEach(s => { if (s.state !== 'ally') { s.state = 'patrol'; s.lost = 0; s.stun = 0; } });
-    g.speak('whisper', 'خُذ نَفَسًا يا نور… الجزيرة آمنة.', 4);
+    G.audio.play('splash');
   };
+  function updRescue(dt) {
+    const r = g.rescue; r.t += dt;
+    if (!r.moved && r.t > 1.1) { r.moved = true; g.fade = 1; const p = g.p; p.x = g.checkpoint.x; p.y = g.checkpoint.y; g.cam.x = p.x; g.cam.y = p.y; }
+    if (r.t > 1.5) { g.status = 'play'; g.rescue = null; g.speak('whisper', 'خُذ نَفَسًا… الدلفين أنقذك. الجزيرة آمنة.', 4); }
+  }
 
   // ---- update ------------------------------------------------------------------------------------------------
   g.update = function (dt) {
     if (g.status === 'menu' || g.status === 'paused' || !g.p) return;
-    g.fade = Math.max(0, g.fade - dt * 1.5);
+    if (g.status !== 'rescue') g.fade = Math.max(0, g.fade - dt * 1.5);
     if (g.say) { g.say.t -= dt; if (g.say.t <= 0) { g.say = null; G.ui.onSpeakEnd && G.ui.onSpeakEnd(); } }
     g.parts = g.parts.filter(q => { q.life += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 0.97; q.vy *= 0.97; return q.life < q.max; });
     g.shake = Math.max(0, g.shake - dt * 30); g.flash = Math.max(0, g.flash - dt * 2.5);
+    if (g.status === 'rescue') { g.fade = g.rescue.t > 1.1 ? g.fade : Math.min(0.9, Math.max(0, (g.rescue.t - 0.7) * 2.2)); updRescue(dt); updDolphin(dt); updCamera(dt); return; }
     if (g.status !== 'play') { updCamera(dt); return; }
     g.time += dt; g.noise = Math.max(0, g.noise - 20 * dt);
     g.lv.movingRocks.forEach(r => { r.x = r.ox + Math.sin(g.time * 0.6 + r.ph) * 130; });
@@ -117,6 +132,7 @@
     updSharks(dt);
     updPuzzle(dt);
     updBottle(dt);
+    updDolphin(dt);
     updWorld();
     updCamera(dt);
     G.audio.update(dt, g.threat > 0.6 ? 2 : g.threat > 0.15 ? 1 : 0);
@@ -132,6 +148,9 @@
       if (p.breath <= 0) { p.diving = false; p.noDive = 1.5; g.toast('نفسي نفد!', 'warn'); }
     } else { p.diving = false; p.breath = Math.min(100, p.breath + 32 * dt); }
     const isl = inSafe(p);
+    if (isl && !p.wasSafe) { const a = Math.atan2(p.lastWater.y - isl.y, p.lastWater.x - isl.x); g.boat = { x: isl.x + Math.cos(a) * isl.r * 0.95, y: isl.y + Math.sin(a) * isl.r * 0.95, ang: a }; g.emit(p.x, p.y, 8, { s1: 50 }); }
+    if (!isl) { p.lastWater.x = p.x; p.lastWater.y = p.y; if (p.wasSafe) g.emit(p.x, p.y, 10, { s1: 60 }); }
+    p.wasSafe = !!isl;
     p.safe = !!isl;
     if (isl) { p.courage = Math.min(100, p.courage + 14 * dt); g.checkpoint = { x: isl.x, y: isl.y }; }
     const holding = g.has('harmony') && G.hold.harmony;
@@ -175,6 +194,27 @@
       if (d < s.r + PR) { const a = Math.atan2(s.y - p.y, s.x - p.x); s.vx += Math.cos(a) * 2000 * dt; s.vy += Math.sin(a) * 2000 * dt; const o = s.r + PR - d; s.x += Math.cos(a) * o; s.y += Math.sin(a) * o; }
     }
     p.calmHold = holding ? p.calmHold + dt : 0;
+  }
+
+  function updDolphin(dt) {
+    const d = g.dolphin, p = g.p;
+    if (!d) return;
+    d.t = (d.t || 0) + dt;
+    if (d.jump > 0) {
+      d.jump -= dt; d.x += Math.cos(d.ang) * 190 * dt; d.y += Math.sin(d.ang) * 190 * dt;
+      if (d.jump <= 0) d.jumpCd = rand(6, 11);
+    } else {
+      d.jumpCd -= dt;
+      // curious until chapter 3, then a close friend
+      const orbit = d.friend ? 150 : 340, a = g.time * 0.35 + d.off;
+      const tx = p.x + Math.cos(a) * orbit, ty = p.y + Math.sin(a) * orbit, dd = Math.hypot(tx - d.x, ty - d.y);
+      const want = Math.atan2(ty - d.y, tx - d.x); d.ang += angDiff(d.ang, want) * Math.min(1, dt * 3);
+      const sp = clamp(dd * 1.2, 40, d.friend ? 260 : 200); d.x += Math.cos(d.ang) * sp * dt; d.y += Math.sin(d.ang) * sp * dt;
+      if (d.jumpCd <= 0 && dd < 160) d.jump = 62 / 30;
+      if (!d.seen && dist(d, p) < 520) { d.seen = true; }
+    }
+    for (const i of g.lv.islands) pushOutCircle(d, i, 30);
+    d.x = clamp(d.x, 40, g.lv.size[0] - 40); d.y = clamp(d.y, 40, g.lv.size[1] - 40);
   }
 
   function sharkSees(s, vision) {
@@ -234,8 +274,8 @@
       for (const r of rocks()) pushOutCircle(s, r, 24);
       s.x = clamp(s.x, 30, lv.size[0] - 30); s.y = clamp(s.y, 30, lv.size[1] - 30);
       if (s.state !== 'ally' && s.stun <= 0 && !p.safe) {
-        const hx = s.x + Math.cos(s.ang) * 50, hy = s.y + Math.sin(s.ang) * 50;
-        if (Math.hypot(p.x - hx, p.y - hy) < 34 || dist(p, s) < 36) {
+        const hx = s.x + Math.cos(s.ang) * 70, hy = s.y + Math.sin(s.ang) * 70;
+        if (Math.hypot(p.x - hx, p.y - hy) < 38 || dist(p, s) < 44) {
           if (g.hurt(s.hunter ? 30 : 25, s)) { s.stun = 1.8; s.state = 'investigate'; s.tx = p.x; s.ty = p.y; s.timer = 1; }
         }
       }

@@ -34,54 +34,49 @@
   }
 
   function drawShark(s, ghost) {
-    ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.ang);
-    if (ghost) ctx.globalAlpha = 0.3;
-    const ally = s.state === 'ally', w = Math.sin(s.wig) * 14;
-    const body = ally ? '#4a8f9e' : (s.hunter ? '#2c2a40' : '#434a5c'), fin = ally ? '#9ee7e0' : '#b03a6e';
-    ctx.fillStyle = body;
-    ctx.beginPath(); ctx.moveTo(62, 0);
-    ctx.bezierCurveTo(40, -26, -20, -24, -52, w * 0.4 - 4);
-    ctx.lineTo(-86, w - 22); ctx.lineTo(-74, w); ctx.lineTo(-86, w + 22); ctx.lineTo(-52, w * 0.4 + 4);
-    ctx.bezierCurveTo(-20, 24, 40, 26, 62, 0); ctx.fill();
-    ctx.fillStyle = fin;
-    ctx.beginPath(); ctx.moveTo(8, -4); ctx.lineTo(-18, -34); ctx.lineTo(-24, -4); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(8, 4); ctx.lineTo(-18, 34); ctx.lineTo(-24, 4); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(44, -10, 3, 0, TAU); ctx.arc(44, 10, 3, 0, TAU); ctx.fill();
-    ctx.restore();
+    const sp = G.sprites, p = g.p, ally = s.state === 'ally';
+    let set = 'sharkMove', f = sp.loop('sharkMove', g.time + s.off, s.state === 'chase' ? 20 : 12);
+    if (!ghost && !ally && s.calm > 0) { set = 'sharkDown'; f = sp.at(set, Math.min(1, s.calm) * 0.55); }
+    else if (!ghost && s.state === 'chase' && G.dist(s, p) < 210) { set = 'sharkAtk'; f = sp.loop(set, g.time + s.off, 26); }
+    if (ally) glow(ctx, s.x, s.y, 120, '126,232,216', 0.35);
+    sp.draw(ctx, set, f, s.x, s.y, s.ang, 1, ghost ? 0.3 : 1);
     if (ghost) return;
     ctx.save(); ctx.translate(s.x, s.y); ctx.textAlign = 'center'; ctx.font = 'bold 28px sans-serif';
-    if (s.state === 'chase') { ctx.fillStyle = '#ff5a7a'; ctx.fillText('!', 0, -50); }
-    else if (s.state === 'investigate' || s.state === 'lured') { ctx.fillStyle = '#ffd36a'; ctx.fillText('?', 0, -50); }
-    if (s.calm > 0 && s.state !== 'ally') { ctx.strokeStyle = 'rgba(160,255,240,.9)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 70, -Math.PI / 2, -Math.PI / 2 + TAU * s.calm); ctx.stroke(); }
+    if (s.state === 'chase') { ctx.fillStyle = '#ff5a7a'; ctx.fillText('!', 0, -60); }
+    else if (s.state === 'investigate' || s.state === 'lured') { ctx.fillStyle = '#ffd36a'; ctx.fillText('?', 0, -60); }
+    if (s.calm > 0 && !ally) { ctx.strokeStyle = 'rgba(160,255,240,.9)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 80, -Math.PI / 2, -Math.PI / 2 + TAU * s.calm); ctx.stroke(); }
     ctx.restore();
   }
 
   function drawPlayer(p) {
-    ctx.save(); ctx.translate(p.x, p.y);
-    if (p.lantern) glow(ctx, 0, 0, 90, '255,235,170', 0.35);
-    if (p.invuln > 0 && Math.floor(g.time * 14) % 2) ctx.globalAlpha = 0.4;
-    if (p.diving) ctx.globalAlpha = 0.45;
-    ctx.rotate(p.ang);
-    const sw = Math.sin(p.walk * 2) * 5, k = p.diving ? 0.85 : 1;
-    ctx.scale(k, k);
-    ctx.strokeStyle = '#ff8a5c'; ctx.lineWidth = 6; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-8, 0); ctx.quadraticCurveTo(-22, sw, -34, -sw * 1.4); ctx.stroke();
-    ctx.fillStyle = '#e7f6ff'; ctx.beginPath(); ctx.ellipse(0, 0, 14, 16, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#8fd0ff';
-    ctx.beginPath(); ctx.ellipse(-2, -15 + sw * 0.5, 7, 4, 0.4, 0, TAU); ctx.ellipse(-2, 15 - sw * 0.5, 7, 4, -0.4, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#ffd9b3'; ctx.beginPath(); ctx.arc(7, 0, 9, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#ff8a5c'; ctx.beginPath(); ctx.arc(5, 0, 9, Math.PI * 0.55, Math.PI * 1.45); ctx.fill();
+    const sp = G.sprites, speed = Math.hypot(p.vx, p.vy), rot = p.ang + Math.PI / 2;
+    ctx.save();
+    if (p.invuln > 0 && g.status === 'play' && Math.floor(g.time * 14) % 2) ctx.globalAlpha = 0.45;
+    if (p.lantern) glow(ctx, p.x, p.y, 90, '255,235,170', 0.35);
+    if (p.diving) {
+      ctx.globalAlpha *= 0.92;
+      sp.draw(ctx, 'dolRide', sp.loop('dolRide', g.time, 30), p.x, p.y, rot);
+    } else if (p.safe) {
+      sp.draw(ctx, 'kid', speed > 25 ? Math.floor(p.walk * 3) % sp.n('kid') : 0, p.x, p.y, rot);
+    } else if (p.dashT > 0) {
+      sp.draw(ctx, 'kick', sp.at('kick', 1 - p.dashT / g.DASH_T), p.x, p.y, rot);
+    } else {
+      sp.draw(ctx, 'boat', sp.loop('boat', g.time, speed > 25 ? 6 + speed / 12 : 4), p.x, p.y, rot);
+    }
     ctx.restore();
+  }
+
+  function drawDolphin(d) {
+    const sp = G.sprites;
+    if (d.jump > 0) sp.draw(ctx, 'dolJump', sp.at('dolJump', 1 - d.jump / (62 / 30)), d.x, d.y, d.ang + Math.PI / 2);
+    else sp.draw(ctx, 'dolMove', sp.loop('dolMove', g.time + d.off, 14), d.x, d.y, d.ang + Math.PI / 2);
   }
 
   function drawBottle(b, t) {
     if (b.veil > 0.95) return;
-    ctx.save(); ctx.translate(b.x, b.y); ctx.globalAlpha = 1 - b.veil;
-    glow(ctx, 0, 0, 110 + Math.sin(t * 3) * 12, '255,225,140', 0.55);
-    ctx.rotate(Math.sin(t * 2) * 0.25);
-    ctx.fillStyle = '#fff7df'; ctx.strokeStyle = '#ffd36a'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.roundRect(-9, -8, 18, 24, 6); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#6fb7ff'; ctx.fillRect(-6, -14, 12, 7); ctx.fillStyle = '#ffd36a'; ctx.fillRect(-4, -18, 8, 5);
+    ctx.save(); ctx.globalAlpha = 1 - b.veil;
+    glow(ctx, b.x, b.y, 110 + Math.sin(t * 3) * 12, '255,225,140', 0.55);
+    G.sprites.drawImg(ctx, 'bottle', b.x, b.y, 92, Math.sin(t * 2) * 0.25);
     ctx.restore();
   }
 
@@ -117,21 +112,23 @@
     }
     // islands
     for (const i of lv.islands) {
-      glow(ctx, i.x, i.y, i.r * 1.5, '170,255,235', 0.25);
-      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.arc(i.x, i.y, i.r + 10 + Math.sin(t * 1.5) * 3, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#e8d49b'; ctx.beginPath(); ctx.arc(i.x, i.y, i.r, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#d3bc80'; ctx.beginPath(); ctx.arc(i.x - i.r * 0.2, i.y - i.r * 0.15, i.r * 0.6, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#3f9a5a'; for (let k = 0; k < 5; k++) { const a = k * 1.26 + i.x; ctx.beginPath(); ctx.ellipse(i.x + Math.cos(a) * 16, i.y + Math.sin(a) * 16, 22, 7, a, 0, TAU); ctx.fill(); }
+      glow(ctx, i.x, i.y, i.r * 1.6, '170,255,235', 0.22);
+      G.sprites.drawImg(ctx, i.img, i.x, i.y, i.drawW || i.r * 2.35);
     }
+    if (g.boat && g.p.safe) G.sprites.drawImg(ctx, 'boatProp', g.boat.x, g.boat.y, 156, g.boat.ang + Math.PI / 2);
     for (const w of lv.weeds) {
       ctx.fillStyle = 'rgba(40,150,90,.55)'; ctx.beginPath(); ctx.arc(w.x, w.y, w.r, 0, TAU); ctx.fill();
       ctx.strokeStyle = 'rgba(100,220,140,.6)'; ctx.lineWidth = 5; ctx.lineCap = 'round';
       for (let k = 0; k < 14; k++) { const a = k * 0.45 + w.ph, r = w.r * (0.2 + (k % 4) * 0.2), bx = w.x + Math.cos(a) * r, by = w.y + Math.sin(a) * r; ctx.beginPath(); ctx.moveTo(bx, by); ctx.quadraticCurveTo(bx + Math.sin(t * 1.5 + k) * 12, by - 18, bx + Math.sin(t * 1.5 + k) * 18, by - 38); ctx.stroke(); }
     }
     for (const r of lv.rocks.concat(lv.movingRocks)) {
-      ctx.fillStyle = '#2f3b4a'; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#44566b'; ctx.beginPath(); ctx.arc(r.x - r.r * 0.2, r.y - r.r * 0.2, r.r * 0.7, 0, TAU); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.arc(r.x - r.r * 0.35, r.y - r.r * 0.35, r.r * 0.25, 0, TAU); ctx.fill();
+      const sh = r.sh || (r.sh = Array.from({ length: 10 }, (_, k) => { const a = k / 10 * TAU, j = 0.86 + (((Math.sin(r.x * 12.9 + r.y * 7.7 + k * 3.1) * 43758.5) % 1) + 1) % 1 * 0.24; return [Math.cos(a) * j, Math.sin(a) * j]; }));
+      ctx.save(); ctx.translate(r.x, r.y); ctx.scale(r.r, r.r);
+      ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.beginPath(); ctx.arc(0, 0, 1.2 + Math.sin(t * 1.5 + r.x) * 0.03, 0, TAU); ctx.fill();
+      const gr = ctx.createRadialGradient(-0.35, -0.35, 0.1, 0, 0, 1.1); gr.addColorStop(0, '#8a97a3'); gr.addColorStop(1, '#2b3642');
+      ctx.fillStyle = gr; ctx.beginPath(); sh.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.beginPath(); ctx.ellipse(-0.3, -0.35, 0.3, 0.16, -0.6, 0, TAU); ctx.fill();
+      ctx.restore();
     }
     // puzzle pieces
     for (const pl of g.plates) { ctx.strokeStyle = pl.on ? 'rgba(255,230,150,.9)' : 'rgba(255,230,150,.5)'; ctx.setLineDash([8, 8]); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(pl.x, pl.y, pl.r, 0, TAU); ctx.stroke(); ctx.setLineDash([]); if (!pl.on) glow(ctx, pl.x, pl.y, 70, '255,230,150', 0.2 + 0.1 * Math.sin(t * 3)); }
@@ -169,15 +166,17 @@
     }
     if (lv.altar) {
       const a = lv.altar; glow(ctx, a.x, a.y, 200, '170,230,255', 0.3 + 0.1 * Math.sin(t * 2));
-      ctx.fillStyle = '#7ea4b8'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r, 0, TAU); ctx.fill(); ctx.fillStyle = '#a9d0e0'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 0.65, 0, TAU); ctx.fill();
+      G.sprites.drawImg(ctx, 'large', a.x, a.y, 340); ctx.fillStyle = 'rgba(126,164,184,.85)'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 0.8, 0, TAU); ctx.fill(); ctx.fillStyle = '#a9d0e0'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 0.65, 0, TAU); ctx.fill();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 0.35, 0, TAU); ctx.stroke();
     }
     for (const m of g.mem) if (!m.got) { glow(ctx, m.x, m.y, 40, '170,220,255', 0.6); ctx.fillStyle = 'rgba(210,240,255,.9)'; ctx.beginPath(); ctx.arc(m.x, m.y + Math.sin(t * 2 + m.x) * 4, 9, 0, TAU); ctx.fill(); }
     if (g.lure) { const L = g.lure, e = L.fly, x = G.lerp(L.sx, L.x, e), y = G.lerp(L.sy, L.y, e) - Math.sin(e * Math.PI) * 50; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 8, 0, TAU); ctx.fill(); if (e >= 1) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(L.x, L.y, 20 + (t * 60) % 60, 0, TAU); ctx.stroke(); } }
-    if (g.ghost) drawShark(Object.assign({ wig: t * 3, state: 'patrol' }, g.ghost), true);
+    if (g.ghost) drawShark(Object.assign({ wig: t * 3, off: 0, calm: 0, state: 'patrol' }, g.ghost), true);
     drawBottle(g.bottle, t);
+    if (g.dolphin && !g.p.diving && g.status !== 'rescue') drawDolphin(g.dolphin);
     for (const s of g.sharks) drawShark(s);
-    drawPlayer(g.p);
+    if (g.status === 'rescue' && !g.rescue.moved) G.sprites.draw(ctx, 'dolSave', G.sprites.at('dolSave', Math.min(0.999, g.rescue.t / 1.5)), g.rescue.x, g.rescue.y, 0, 1.1);
+    else drawPlayer(g.p);
     // guidance arrow
     const tg = G.hudTarget && G.hudTarget();
     if (tg) {

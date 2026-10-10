@@ -14,8 +14,8 @@
     K[e.code] = true;
     if (e.code === 'Escape' || e.code === 'KeyP') togglePause();
     else if (e.code === 'KeyM') setMute(!G.audio.muted);
-    else if (MAP[e.code]) g.press(MAP[e.code]);
     else if ((e.code === 'Space' || e.code === 'Enter') && cardAdvance) cardAdvance();
+    else if (MAP[e.code]) g.press(MAP[e.code]);
   });
   addEventListener('keyup', e => { K[e.code] = false; });
   addEventListener('blur', () => { Object.keys(K).forEach(k => K[k] = false); G.hold.dive = G.hold.harmony = false; if (g.status === 'play') togglePause(); });
@@ -58,7 +58,7 @@
   $('btnMute').onclick = () => setMute(!G.audio.muted); $('btnPMute').onclick = () => setMute(!G.audio.muted);
   $('btnPause').onclick = togglePause; $('btnResume').onclick = togglePause;
   $('btnRestart').onclick = () => { show('pause', false); g.startLevel(g.li); };
-  const toMenu = () => { ['pause', 'ending', 'choice', 'reward', 'cards'].forEach(i => show(i, false)); show('hud', false); show('chapterCard', false); g.status = 'menu'; refreshMenu(); show('menu'); };
+  const toMenu = () => { ['pause', 'ending', 'choice', 'reward', 'cards', 'transition'].forEach(i => show(i, false)); $('endVideo').pause(); $('menuVideo').play().catch(() => {}); show('hud', false); show('chapterCard', false); g.status = 'menu'; refreshMenu(); show('menu'); };
   $('btnPMenu').onclick = toMenu; $('btnEndMenu').onclick = toMenu;
 
   // ---- story cards ----
@@ -71,13 +71,36 @@
     };
     cardAdvance = next; box.onclick = next; next();
   }
+  // Comic-panel intro (assets/story) inside the story frame.
+  function runStory(panels, done) {
+    let i = 0; const box = $('storyFrame'), dots = $('cardDots');
+    dots.innerHTML = panels.map(() => '<i></i>').join('');
+    const next = () => {
+      if (i >= panels.length) { cardAdvance = null; done(); return; }
+      const pn = panels[i], src = 'assets/story/' + pn.img + '.webp', im = $('cardImg');
+      im.style.animation = 'none'; void im.offsetWidth; im.style.animation = ''; im.src = src;
+      $('cardsBg').style.backgroundImage = `url(${src})`; $('cardTitle').textContent = pn.title; $('cardText').textContent = pn.text;
+      [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)); i++;
+      G.audio.play('click');
+    };
+    cardAdvance = next; box.onclick = next; next();
+  }
+  function playTransition(done) {
+    const v = $('trVideo'); show('transition'); v.muted = G.audio.muted; v.currentTime = 0;
+    let fin = false;
+    const end = () => { if (fin) return; fin = true; v.pause(); v.onended = null; show('transition', false); done(); };
+    v.onended = end; $('btnTrSkip').onclick = end;
+    const pr = v.play(); if (pr && pr.catch) pr.catch(end);
+  }
   function startGame(level) {
-    G.audio.init(); show('menu', false);
+    G.audio.init(); show('menu', false); $('menuVideo').pause();
     g.abilities = new Set(); g.memories = new Set(G.save.load().memories || []);
-    const go = () => { show('cards', false); cardAdvance = null; g.startLevel(level); };
+    const go = () => { show('cards', false); show('transition', false); cardAdvance = null; g.startLevel(level); };
     if (level === 0) {
-      show('cards'); $('btnSkip').onclick = go;
-      runCards(G.story.intro, 'cards', 'cardText', go);
+      show('cards');
+      const toVideo = () => { show('cards', false); cardAdvance = null; playTransition(go); };
+      $('btnSkip').onclick = toVideo;
+      runStory(G.story.intro, toVideo);
     } else go();
   }
   function refreshMenu() { const s = G.save.load(); show('btnContinue', s.level > 0 && !s.done); $('btnNew').textContent = s.level > 0 ? 'رحلة جديدة' : 'ابدأ الرحلة'; }
@@ -89,10 +112,19 @@
   $('btnAgain').onclick = () => { show('ending', false); G.save.clear(); startGame(0); };
   G.ui.onEnding = () => {};
   function showEnding(kind) {
-    const e = G.story.endings[kind]; show('ending'); show('endBtns', false); show('endHint');
+    const e = G.story.endings[kind]; endArt = e.art; show('ending'); show('endBtns', false); show('endHint'); $('endVideo').play().catch(() => {});
     $('endTitle').textContent = e.title; $('endBadge').textContent = e.badge;
     const lines = e.lines.slice();
     runCards(lines, 'ending', 'endText', () => { show('endHint', false); show('endBtns'); });
+  }
+
+  let endArt = null;
+  const ecv = $('endCv'), ectx = ecv.getContext('2d');
+  function drawEndArt(t) {
+    if ($('ending').classList.contains('hidden')) return;
+    ectx.clearRect(0, 0, ecv.width, ecv.height); const sp = G.sprites;
+    if (endArt === 'jump') { sp.draw(ectx, 'dolRideJump', Math.floor(t * 30) % sp.n('dolRideJump'), ecv.width / 2, ecv.height / 2 + 10, 0, 1.3); }
+    else { ectx.globalAlpha = 0.5 + 0.2 * Math.sin(t * 1.5); sp.drawImg(ectx, 'bottle', ecv.width / 2, ecv.height / 2, 200, -0.5); ectx.globalAlpha = 1; }
   }
 
   // ---- loop ----
@@ -100,10 +132,13 @@
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     readInput();
-    g.update(dt); G.render(); G.hud.update();
+    g.update(dt); G.render(); G.hud.update(); drawEndArt(now / 1000);
     requestAnimationFrame(frame);
   }
   refreshMenu();
   requestAnimationFrame(frame);
+  G.sprites.load(p => { $('loadFill').style.width = Math.round(p * 100) + '%'; $('loadTxt').textContent = 'جارٍ التحميل… ' + Math.round(p * 100) + '%'; }).then(() => {
+    show('loading', false); show('menu'); $('menuVideo').play().catch(() => {});
+  });
   window.__dbg = { G };
 })();

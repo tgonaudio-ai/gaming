@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>قارورة الحليب</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +13,7 @@
 <div id="hud" class="hidden">
   <div id="vignette"></div><div id="flash"></div>
   <div class="panel hud-vitals">
-    <div class="portrait"><span>ن</span></div>
+    <div class="portrait"><img src="assets/KID_WALK/0000.webp" alt=""></div>
     <div class="bars">
       <div class="bar-row"><label>الشجاعة</label><div class="bar courage"><i id="courageFill"></i></div></div>
       <div class="bar-row" id="breathRow"><label>النَّفَس</label><div class="bar breath"><i id="breathFill"></i></div></div>
@@ -41,7 +42,10 @@
 
 <div id="chapterCard" class="hidden"><small id="ccSub"></small><h2 id="ccName"></h2></div>
 
-<section id="menu" class="screen">
+<section id="loading" class="screen"><div class="load-box"><div class="moon"></div><h2>قارورة الحليب</h2><div class="load-bar"><i id="loadFill"></i></div><small id="loadTxt">جارٍ التحميل…</small></div></section>
+
+<section id="menu" class="screen hidden">
+  <video id="menuVideo" src="assets/menu/bg.mp4" muted loop playsinline preload="auto"></video>
   <div class="menu-box">
     <div class="moon"></div>
     <h1>قارورة الحليب</h1>
@@ -57,7 +61,19 @@
   </div>
 </section>
 
-<section id="cards" class="screen hidden"><div class="card-box"><p id="cardText"></p><div class="hint">اضغط للمتابعة</div></div><button class="skip" id="btnSkip">تخطّي</button></section>
+<section id="cards" class="screen hidden">
+  <div class="cards-bg" id="cardsBg"></div>
+  <div class="story-frame" id="storyFrame">
+    <div class="win"><img id="cardImg" alt=""></div>
+    <img class="frame" src="assets/story/frame.webp" alt="">
+    <div class="cap"><b id="cardTitle"></b><p id="cardText"></p></div>
+  </div>
+  <div class="dots" id="cardDots"></div>
+  <div class="hint cards-hint">اضغط للمتابعة</div>
+  <button class="skip" id="btnSkip">تخطّي</button>
+</section>
+
+<section id="transition" class="screen hidden"><video id="trVideo" src="assets/menu/transition.mp4" playsinline preload="auto"></video><button class="skip" id="btnTrSkip">تخطّي</button></section>
 
 <section id="reward" class="screen hidden"><div class="modal">
   <small>قدرة جديدة</small><div class="big-icon" id="rwIcon"></div><h2 id="rwName"></h2><p id="rwHint"></p><div class="keycap" id="rwKey"></div>
@@ -71,7 +87,7 @@
   <button class="btn" id="btnKeep">أحتفظ بها وأعود بسرعة</button>
 </div></section>
 
-<section id="ending" class="screen hidden"><div class="card-box"><h3 id="endTitle"></h3><p id="endText"></p><div class="hint" id="endHint">اضغط للمتابعة</div>
+<section id="ending" class="screen hidden"><video id="endVideo" src="assets/menu/bg.mp4" muted loop playsinline></video><div class="card-box"><canvas id="endCv" width="480" height="270"></canvas><h3 id="endTitle"></h3><p id="endText"></p><div class="hint" id="endHint">اضغط للمتابعة</div>
   <div id="endBtns" class="hidden"><div class="badge" id="endBadge"></div><button class="btn primary" id="btnAgain">العب مجددًا</button><button class="btn" id="btnEndMenu">القائمة</button></div></div></section>
 
 <section id="pause" class="screen hidden"><div class="modal">
@@ -81,6 +97,8 @@
 </div></section>
 
 <script src="js/util.js"></script>
+<script src="js/manifest.js"></script>
+<script src="js/sprites.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/story.js"></script>
 <script src="js/levels.js"></script>
