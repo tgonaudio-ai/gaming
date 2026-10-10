@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>زجاجة سامر — كتاب قصصي تفاعلي</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1d2127;--bar:#262b33;--ink:#2a2118;--paper:#f5eedc;--paper2:#e9dfc6;--fs:19px;--ui:#e9e4d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body[data-theme=white]{--paper:#fcfbf8;--paper2:#ece9e2;--ink:#1c1c1c}
+body[data-theme=night]{--paper:#2b2a33;--paper2:#1f1e26;--ink:#e8e2cf}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(ellipse at 50% 40%,#2c333d,var(--bg) 70%);color:var(--ui);font-family:Amiri,'Noto Naskh Arabic',serif;display:flex;flex-direction:column;align-items:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+header{padding:10px 0 0;font-family:'Reem Kufi',Amiri,serif;font-size:15px;letter-spacing:.5px;opacity:.8;text-align:center}
+#prog{width:min(420px,70vw);height:3px;background:#ffffff22;border-radius:3px;margin:8px auto 0;overflow:hidden}
+#prog i{display:block;height:100%;width:0;background:#e0b25a}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;width:100%;perspective:2600px;min-height:0}
+.book{--bw:min(96vw,calc((100vh - 170px) * 1.5));width:var(--bw);aspect-ratio:3/2;position:relative;transform-style:preserve-3d;touch-action:none;cursor:grab;filter:none}
+.book:active{cursor:grabbing}
+.leaf{position:absolute;left:0;top:0;width:50%;height:100%;transform-origin:right center;transform-style:preserve-3d}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;background:var(--paper)}
+.face.f{border-radius:10px 0 0 10px;box-shadow:-2px 6px 18px #0008}
+.face.b{transform:rotateY(180deg);border-radius:0 10px 10px 0;box-shadow:2px 6px 18px #0008}
+.face::before,.sf::before{content:"";position:absolute;inset:0;opacity:.55;pointer-events:none;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .25 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+body[data-theme=night] .face::before{mix-blend-mode:screen;opacity:.15}
+.face.f::after,.face.b::after{content:"";position:absolute;inset:0;pointer-events:none}
+.face.f::after{background:linear-gradient(to left,#0000002e 0,#0000 12%)}
+.face.b::after{background:linear-gradient(to right,#0000002e 0,#0000 12%)}
+.sh{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:5}
+.f .sh{background:linear-gradient(to left,#000 0,#0006 40%,#fff2 100%)}
+.b .sh{background:linear-gradient(to right,#000 0,#0006 40%,#fff2 100%)}
+.cast{position:absolute;top:0;width:50%;height:100%;pointer-events:none;opacity:0;z-index:90}
+.cast.l{left:0;background:linear-gradient(to left,#0007,#0000 60%)}
+.cast.r{right:0;background:linear-gradient(to right,#0007,#0000 60%)}
+.txt{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:12% 13%;color:var(--ink);font-size:calc(var(--fs) * var(--bw-k,1));line-height:2.05;text-align:right}
+.txt p{margin:0;font-size:clamp(13px,calc(var(--bw) * .026 * var(--fz,1)),32px)}
+.txt .ch{font-family:'Reem Kufi',Amiri,serif;color:#b0782b;font-size:clamp(11px,calc(var(--bw) * .016),18px);margin-bottom:.8em;letter-spacing:1px}
+.txt .pn{position:absolute;bottom:4%;left:0;right:0;text-align:center;font-size:clamp(10px,calc(var(--bw) * .015),15px);opacity:.55}
+.txt h2{font-family:'Reem Kufi',Amiri,serif;font-size:clamp(20px,calc(var(--bw) * .05),50px);margin:0 0 .3em;text-align:center;color:#b0782b}
+.txt .c{text-align:center}
+.cover{position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,#2b6f78,#12414a 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#f1d28b;text-align:center;padding:8%;border:calc(var(--bw) * .008) solid #0b2c33;outline:2px solid #f1d28b55;outline-offset:-14px}
+.cover h1{font-family:'Reem Kufi',Amiri,serif;font-size:clamp(24px,calc(var(--bw) * .06),64px);margin:.4em 0 .1em}
+.cover small{font-size:clamp(11px,calc(var(--bw) * .02),20px);opacity:.85}
+.cover svg{width:34%}
+.ill{position:absolute;inset:0}
+.ill svg{width:100%;height:100%;display:block}
+nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:10px 10px 14px;max-width:100%}
+button{font:inherit;font-size:15px;background:var(--bar);color:var(--ui);border:1px solid #ffffff1f;border-radius:10px;padding:7px 12px;cursor:pointer}
+button:hover{background:#343b46}button.on{background:#a8741f;color:#fff}
+#toc{position:fixed;inset:auto 0 70px 0;margin:auto;width:min(340px,92vw);background:#262b33f2;border:1px solid #ffffff22;border-radius:14px;padding:8px;display:none;z-index:999;backdrop-filter:blur(6px)}
+#toc.show{display:block}#toc button{display:block;width:100%;text-align:right;border:0;background:none;padding:9px 12px}
+#toc button:hover{background:#ffffff14}
+.sw{width:26px;height:26px;border-radius:50%;padding:0;border:2px solid #ffffff55}
+.bending .face{visibility:hidden}
+.bent{position:absolute;inset:0;transform-style:preserve-3d}
+.seg{position:absolute;top:0;height:100%;transform-origin:right center;transform-style:preserve-3d}
+.sf{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper)}
+.sfb{transform:rotateY(180deg)}
+.cw{position:absolute;top:0;height:100%}
+.spf{position:absolute;inset:0;pointer-events:none}
+.spf.f{background:linear-gradient(to left,#0000002e 0,#0000 12%)}
+.spf.b{background:linear-gradient(to right,#0000002e 0,#0000 12%)}
+.ss{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none}
+.btn-game{background:linear-gradient(135deg,#0284c7,#06b6d4);color:#fff;font-weight:700;border-color:#38bdf8;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-game:hover{background:linear-gradient(135deg,#0369a1,#0891b2)}
+</style>
+</head>
+<body data-theme="cream">
+<header>زجاجة سامر — اسحب الصفحة أو انقر على أحد الجانبين<div id="prog"><i></i></div></header>
+<div class="stage"><div class="book" id="book"><div class="cast l" id="cl"></div><div class="cast r" id="cr"></div></div></div>
+<div id="toc"></div>
+<nav>
+<button id="bNext">◀ التالي</button><button id="bPrev">السابق ▶</button>
+<button id="bToc">☰ الفصول</button><button id="bRead">🔊 اقرأ</button><button id="bAuto">▶ قراءة تلقائية</button>
+<button id="bMark">🔖 علامة</button><button id="bResume" style="display:none">↩ متابعة</button>
+<button id="fPlus">أ+</button><button id="fMinus">أ−</button>
+<button class="sw" data-t="cream" style="background:#f5eedc" title="كريمي"></button><button class="sw" data-t="white" style="background:#fcfbf8" title="أبيض"></button><button class="sw" data-t="night" style="background:#2b2a33" title="ليلي"></button>
+<button id="bSnd" class="on">🔈 صوت</button>
+<a href="game.html" class="btn-game" id="bGame" style="padding:7px 14px;border-radius:10px">⛵ العب اللعبة</a>
+</nav>
+<script>
+const $=s=>document.querySelector(s), book=$('#book');
+const TX=[null,
+"في صباحٍ صيفيٍّ جميل، ذهب سامر مع والده إلى الشاطئ. كان الموج هادئًا، والرمل دافئًا، والسماء صافية كأنها مرآة كبيرة.",
+"بنى سامر قلعةً من الرمل، ثم أطلق زجاجته الزرقاء الصغيرة على الماء ليرى كيف تتمايل مع الموج. ضحك وصفّق فرحًا.",
+"حاول سامر الإمساك بالزجاجة، لكنها كانت تبتعد بسرعة نحو البحر العميق. نظر إلى الأفق بحزن، ثم قال بصوتٍ عازم: «سألحق بها!»",
+"وضع الأب يده الدافئة على كتفه وقال: «البحر كبير يا بني، ولا نلحق به بالعجلة، بل بالحكمة والصبر.»",
+"ارتدى سامر طوق النجاة، وسبح مع والده قريبًا من الشاطئ. وبعد قليل دفع الموج الزجاجة نحوهما بلطف.",
+"أمسك سامر بالزجاجة، ووجد بداخلها ورقةً صغيرة كُتب عليها: «من وجدني فليبتسم، فالأشياء الجميلة تعود لمن ينتظرها.»",
+"عاد سامر إلى البيت عند الغروب ويده في يد أبيه، وقد تعلّم أن الصبر أجمل من العجلة، وأن البحر يُرجع ما يُحَبّ."];
+const CH=["","الشاطئ","القلعة","الزجاجة تبتعد","كلمات الأب","طوق النجاة","الرسالة","الغروب"];
+const N=9, fa=n=>n.toLocaleString('ar-EG');
+// ---------- SVG helpers
+const boy=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})"><rect x="-13" y="-52" width="26" height="30" rx="9" fill="#d89a70"/><rect x="-14" y="-26" width="28" height="22" rx="4" fill="#2f4f9a"/><rect x="-10" y="-6" width="7" height="8" fill="#d89a70"/><rect x="3" y="-6" width="7" height="8" fill="#d89a70"/><circle cx="0" cy="-64" r="14" fill="#d89a70"/><g fill="#4a2c1a"><circle cx="-12" cy="-72" r="8"/><circle cx="-4" cy="-78" r="8"/><circle cx="6" cy="-77" r="8"/><circle cx="13" cy="-70" r="7"/><circle cx="-13" cy="-62" r="6"/><circle cx="13" cy="-61" r="6"/></g></g>`;
+const dad=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})"><rect x="-22" y="-78" width="44" height="52" rx="10" fill="#6f7f90"/><rect x="-19" y="-28" width="16" height="28" fill="#2c3547"/><rect x="3" y="-28" width="16" height="28" fill="#2c3547"/><rect x="-10" y="-90" width="20" height="14" rx="6" fill="#c98b62"/><path d="M-20-92c-2-16 12-26 22-24 12 0 20 10 17 24-4-6-9-9-18-9-9 0-16 3-21 9z" fill="#15151b"/><ellipse cx="0" cy="-98" rx="17" ry="18" fill="#15151b" opacity=".0"/></g>`;
+const bottle=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})"><rect x="-5" y="-12" width="10" height="20" rx="3" fill="#fff" stroke="#8fb8e0" stroke-width="1"/><rect x="-5.5" y="-16" width="11" height="5" rx="1" fill="#3b7bd1"/><path d="M-2.5-16q2.5-8 5 0z" fill="#f0b45a"/><rect x="-3" y="-4" width="6" height="2" fill="#3b7bd1" opacity=".6"/></g>`;
+const castle=(x,y)=>`<g transform="translate(${x} ${y})" fill="#d9b673" stroke="#b8924f" stroke-width="1"><rect x="-26" y="-30" width="52" height="30"/><rect x="-26" y="-40" width="10" height="10"/><rect x="-5" y="-40" width="10" height="10"/><rect x="16" y="-40" width="10" height="10"/><path d="M-6 0v-14a6 6 0 0112 0v14z" fill="#9e7a3d"/></g>`;
+const ring=(x,y)=>`<g transform="translate(${x} ${y})"><circle r="24" fill="none" stroke="#e8553e" stroke-width="9"/><g stroke="#fff" stroke-width="9"><path d="M0-24v0M-17-17l0 0"/></g><circle r="24" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="19 38"/></g>`;
+function scene(i){
+ const P=[["#58b2e6","#bfe4f5",52],["#58b2e6","#bfe4f5",52],["#58b2e6","#bfe4f5",60],["#4fa6de","#b6dcf0",44],["#6aa7cf","#cfe0e8",70],["#4fa6de","#b6dcf0",50],["#7ec3e6","#e9f3f0",60],["#f08a4b","#ffd9a0",150]][i];
+ const sea=i==7?["#d27a55","#2e5a86"]:["#4aa6c7","#165d93"];
+ let ex="";
+ if(i==1)ex=boy(105,388,1.2)+dad(195,396,1.15);
+ if(i==2)ex=castle(90,350)+boy(190,385,1.2)+bottle(200,205,1.3);
+ if(i==3)ex=boy(105,388,1.2)+dad(195,396,1.15)+bottle(165,150,.8);
+ if(i==4)ex=boy(105,388,1.2)+dad(195,396,1.15)+`<path d="M130 316q30-16 62-6" stroke="#6f7f90" stroke-width="14" stroke-linecap="round" fill="none"/>`+bottle(190,128,.55);
+ if(i==5)ex=`<rect x="0" y="262" width="300" height="12" fill="#fff" opacity=".25"/><g>${boy(120,300,1.15)}${ring(120,268)}${dad(205,318,1.1)}</g><path d="M0 285q40-14 80 0t80 0t80 0t60 0v30H0z" fill="#2f86b5" opacity=".85"/>`+bottle(240,235,1.2);
+ if(i==6)ex=`<rect x="0" y="0" width="300" height="400" fill="#e7f2f6" opacity=".0"/><g transform="translate(150 215) scale(5.2)">${bottle(0,0,1)}</g><g transform="translate(150 210) rotate(-6)"><rect x="-26" y="-8" width="52" height="30" rx="3" fill="#f3e5b8" stroke="#b79b5a"/><path d="M-18 2h36M-18 9h30M-18 16h22" stroke="#8a6d36" stroke-width="2"/></g>`;
+ if(i==7)ex=boy(125,390,1.2)+dad(205,396,1.15)+bottle(150,325,.9);
+ const night=i==7;
+ return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sk${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P[0]}"/><stop offset="1" stop-color="${P[1]}"/></linearGradient><linearGradient id="se${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sea[0]}"/><stop offset="1" stop-color="${sea[1]}"/></linearGradient><linearGradient id="sa${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${night?"#d9a06a":"#ecd196"}"/><stop offset="1" stop-color="${night?"#a8704a":"#d9b676"}"/></linearGradient></defs>
+ <rect width="300" height="400" fill="url(#sk${i})"/><circle cx="${i==7?210:230}" cy="${P[2]}" r="${i==7?34:26}" fill="${i==7?"#ffe6a8":"#fff6c8"}" opacity=".95"/>
+ <rect y="165" width="300" height="115" fill="url(#se${i})"/><g stroke="#fff" stroke-opacity=".5" fill="none" stroke-width="2" stroke-linecap="round"><path d="M20 190q15-6 30 0M200 200q20-7 40 0M90 215q18-6 36 0M240 235q14-5 28 0M10 245q20-7 40 0"/></g>
+ <path d="M0 262q40-18 80-6t80-4t80 4t60-6V400H0z" fill="url(#sa${i})"/><path d="M0 262q40-18 80-6t80-4t80 4t60-6" fill="none" stroke="#fff" stroke-width="4" opacity=".7"/>${ex}</svg>`;
+}
+// ---------- build faces
+function face(s){
+ if(s==0)return `<div class="cover"><svg viewBox="0 0 60 80"><g transform="translate(30 42) scale(3.2)"><rect x="-5" y="-12" width="10" height="20" rx="3" fill="#f5eedc" stroke="#f1d28b"/><rect x="-5.5" y="-16" width="11" height="5" rx="1" fill="#f1d28b"/><path d="M-2.5-16q2.5-8 5 0z" fill="#f1d28b"/></g></svg><h1>زجاجة سامر</h1><small>قصة مصوّرة تفاعلية</small><small style="margin-top:2em;opacity:.6">اسحب الصفحة لبدء القراءة</small></div>`;
+ if(s==17)return `<div class="cover"><h1>النهاية</h1><small>شكرًا لقراءتك</small></div>`;
+ if(s==1)return `<div class="txt"><h2>زجاجة سامر</h2><p class="c">حكاية عن الصبر والحكمة وبحرٍ يُرجع ما يُحَبّ.</p></div>`;
+ if(s%2==1){const i=(s-1)/2;return `<div class="txt"><div class="ch">الفصل ${fa(i)} · ${CH[i]}</div><p>${TX[i]}</p><div class="pn">${fa(s)}</div></div>`}
+ return `<div class="ill">${scene(s/2-1)}</div>`;
+}
+const leaves=[];
+for(let k=0;k<N;k++){
+ const L=document.createElement('div');L.className='leaf';const h0=face(2*k),h1=face(2*k+1);
+ L.innerHTML=`<div class="face f">${h0}<div class="sh"></div></div><div class="face b">${h1}<div class="sh"></div></div>`;
+ book.appendChild(L);leaves.push({el:L,fs:L.querySelector('.f .sh'),bs:L.querySelector('.b .sh'),h0,h1});
+}
+// ---------- physics
+const A=Array(N).fill(0),T=Array(N).fill(0),V=Array(N).fill(0);let drag=-1,raf=0,last=0;
+const cl=$('#cl'),cr=$('#cr');
+const flipped=()=>T.filter(t=>t>90).length;
+const S=14,SM=Array(N).fill(0),PA=Array(N).fill(0);
+function build(l){if(l.bent)return;const W=l.el.offsetWidth,w=W/S,root=document.createElement('div');root.className='bent';let p=root;l.segs=[];
+ for(let j=0;j<S;j++){const g=document.createElement('div');g.className='seg';g.style.width=(j?w+.6:w)+'px';g.style.left=(j?-w:W-w)+'px';
+  g.innerHTML=`<div class="sf"><div class="cw" style="width:${W}px;left:${-(W-(j+1)*w)}px">${l.h0}<div class="spf f"></div></div><i class="ss"></i></div><div class="sf sfb"><div class="cw" style="width:${W}px;left:${(j?.6:0)-j*w}px">${l.h1}<div class="spf b"></div></div><i class="ss"></i></div>`;
+  p.appendChild(g);p=g;l.segs.push({g,a:g.children[0].lastChild,b:g.children[1].lastChild});}
+ l.el.appendChild(root);l.root=root;l.bent=true;l.el.classList.add('bending')}
+function unbuild(l){if(!l.bent)return;l.root.remove();l.bent=false;l.el.classList.remove('bending')}
+function render(){
+ let mid=0;
+ leaves.forEach((l,i)=>{const a=A[i],sn=Math.sin(a*Math.PI/180);l.el.style.transform=`rotateY(${a}deg)`;
+  l.el.style.zIndex=(i==drag?200:(a>90?i:N-i))+1;mid=Math.max(mid,sn);
+  if(i==drag||(a>.3&&a<179.7)){build(l);
+   const rel=-Math.max(-1,Math.min(1,SM[i]*5))*3.6*sn;let c=a;
+   l.segs.forEach((s,j)=>{if(j){c+=rel;s.g.style.transform=`rotateY(${rel}deg)`}
+    const sh=Math.abs(Math.sin(c*Math.PI/180))*.5;s.a.style.opacity=c<90?sh:0;s.b.style.opacity=c>90?sh:0});
+  }else unbuild(l);});
+ cl.style.opacity=cr.style.opacity=mid*.45;
+ const sh=((1-Math.min(A[0]/90,1))-Math.max((A[N-1]-90)/90,0))*25;
+ book.style.transform=`translateX(${sh}%)`;
+ const f=flipped();$('#prog i').style.width=(f/N*100)+'%';
+}
+function tick(t){
+ const dt=Math.min(32,t-last||16);last=t;let busy=false;const w=.0075;
+ for(let i=0;i<N;i++){if(i==drag)continue;
+  const d=T[i]-A[i];if(Math.abs(d)<.05&&Math.abs(V[i])<.002){A[i]=T[i];V[i]=0;continue}
+  busy=true;V[i]+=(w*w*d-2*w*V[i])*dt;A[i]+=V[i]*dt;A[i]=Math.max(0,Math.min(180,A[i]));}
+ for(let i=0;i<N;i++){SM[i]=.7*SM[i]+.3*(A[i]-PA[i])/dt;PA[i]=A[i]}
+ render();raf=busy||drag>=0?requestAnimationFrame(tick):0;
+}
+const kick=()=>{if(!raf){last=0;raf=requestAnimationFrame(tick)}};
+let snd=true,ac;
+function flipSound(){if(!snd)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const n=ac.sampleRate*.28,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);
+ for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3)*(i<n*.15?i/(n*.15):1);
+ const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='bandpass';f.frequency.value=2200;g.gain.value=.25;s.buffer=b;s.connect(f);f.connect(g);g.connect(ac.destination);s.start()}catch(e){}}
+function flip(i,to,v=0){if(i<0||i>=N)return;T[i]=to;V[i]+=v;flipSound();kick();updateUI()}
+const next=()=>{const f=flipped();if(f<N)flip(f,180,.15)}, prev=()=>{const f=flipped();if(f>0)flip(f-1,0,-.15)};
+function goTo(F){const f=flipped();if(F>f)for(let k=f;k<F;k++)setTimeout(()=>flip(k,180,.1),(k-f)*130);else for(let k=f-1;k>=F;k--)setTimeout(()=>flip(k,0,-.1),(f-1-k)*130)}
+// ---------- pointer interaction
+let st=null;
+book.addEventListener('pointerdown',e=>{
+ const r=book.getBoundingClientRect(),cx=r.left+r.width/2,f=flipped();
+ const left=e.clientX<cx;const i=left?f:f-1;if(i<0||i>=N)return;
+ book.setPointerCapture(e.pointerId);st={i,cx,wh:r.width/2,x0:e.clientX,t0:performance.now(),lx:e.clientX,lt:performance.now(),v:0,left,moved:false};
+});
+book.addEventListener('pointermove',e=>{if(!st)return;
+ if(!st.moved&&Math.abs(e.clientX-st.x0)>6){st.moved=true;drag=st.i;V[st.i]=0;kick()}
+ if(!st.moved)return;
+ const c=Math.max(-1,Math.min(1,-(e.clientX-st.cx)/st.wh)),a=Math.acos(c)*180/Math.PI;
+ const now=performance.now(),dt=now-st.lt||1;st.v=.7*st.v+.3*((a-A[st.i])/dt);st.lt=now;A[st.i]=a;});
+const up=e=>{if(!st)return;const s=st;st=null;
+ if(!s.moved){s.left?next():prev();return}
+ drag=-1;const a=A[s.i],to=(s.v>.12)?180:(s.v<-.12)?0:(a>90?180:0);
+ if((to>90)!=(T[s.i]>90))flipSound();T[s.i]=to;V[s.i]=s.v;kick();updateUI()};
+book.addEventListener('pointerup',up);book.addEventListener('pointercancel',up);
+addEventListener('keydown',e=>{if(e.key=='ArrowLeft')next();if(e.key=='ArrowRight')prev()});
+// ---------- story system
+const toc=$('#toc');toc.innerHTML=['الغلاف',...CH.slice(1).map((c,i)=>`${fa(i+1)}. ${c}`),'النهاية'].map((c,i)=>`<button data-f="${i==0?0:i==8?9:i+1}">${c}</button>`).join('');
+toc.onclick=e=>{const f=e.target.dataset.f;if(f!=null){goTo(+f);toc.classList.remove('show')}};
+$('#bToc').onclick=()=>toc.classList.toggle('show');
+$('#bNext').onclick=next;$('#bPrev').onclick=prev;
+const curText=()=>{const f=flipped(),s=2*f-1;return s>=3&&s<=15?TX[(s-1)/2]:s==1?'زجاجة سامر. حكاية عن الصبر والحكمة.':''};
+function speak(txt,cb){speechSynthesis.cancel();if(!txt){cb&&cb();return}const u=new SpeechSynthesisUtterance(txt);u.lang='ar-SA';u.rate=.85;u.onend=()=>cb&&cb();speechSynthesis.speak(u)}
+let auto=false;
+$('#bRead').onclick=()=>{auto=false;$('#bAuto').classList.remove('on');speak(curText())};
+function loop(){if(!auto)return;speak(curText(),()=>{if(!auto)return;if(flipped()>=N-1){auto=false;$('#bAuto').classList.remove('on');return}setTimeout(()=>{next();setTimeout(loop,1000)},500)})}
+$('#bAuto').onclick=e=>{auto=!auto;e.target.classList.toggle('on',auto);if(auto)loop();else speechSynthesis.cancel()};
+const sv=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},ld=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+$('#bMark').onclick=()=>{sv('sameer-mark',flipped());$('#bMark').textContent='✔ حُفظت';setTimeout(()=>$('#bMark').textContent='🔖 علامة',1200)};
+const m=+ld('sameer-mark');if(m>0){$('#bResume').style.display='';$('#bResume').onclick=()=>goTo(m)}
+let fz=1;$('#fPlus').onclick=()=>{fz=Math.min(1.5,fz+.1);book.style.setProperty('--fz',fz)};$('#fMinus').onclick=()=>{fz=Math.max(.8,fz-.1);book.style.setProperty('--fz',fz)};
+document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{document.body.dataset.theme=b.dataset.t;sv('sameer-theme',b.dataset.t)});
+const th=ld('sameer-theme');if(th)document.body.dataset.theme=th;
+$('#bSnd').onclick=e=>{snd=!snd;e.target.classList.toggle('on',snd)};
+function updateUI(){}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>فتى البحر — مغامرة المحيط</title>
+<!-- CSS Modules -->
+<link rel="stylesheet" href="css/game.css">
+<link rel="stylesheet" href="css/hud.css">
+<link rel="stylesheet" href="css/hud_aaa.css">
+<link rel="stylesheet" href="css/story.css">
+<link rel="stylesheet" href="css/tutorial.css">
+</head>
+<body>
+<canvas id="c"></canvas>
+<canvas id="g"></canvas>
+
+
+<div id="hud">
+
+  <!-- Hidden Game State Anchors (Maintains engine lifecycle without visual clutter) -->
+  <div style="display:none" aria-hidden="true">
+    <div id="hearts"></div>
+    <div id="score"></div>
+    <div id="woodCount"></div>
+    <div id="depth"></div>
+    <div id="lblLvl"></div>
+    <div id="chipWood"></div>
+    <div id="chipLvl"></div>
+    <div id="chipCompass"></div>
+    <div id="compassArrow"></div>
+    <div id="compassTxt"></div>
+    <button id="btnSound"></button>
+    <button id="btnPause"></button>
+  </div>
+
+
+    <!-- MINI MAP -->
+  <div id="miniMap" aria-label="Mini map">
+    <canvas id="miniMapCanvas" width="160" height="160"></canvas>
+    <div class="compass">
+      <b class="n">N</b><b class="e">E</b><b class="s">S</b><b class="w">W</b>
+    </div>
+  </div>
+
+  <!-- MINI MAP EXPLANATION -->
+  <div id="miniLegend" class="panel guide-callout">
+    <div class="label-title">MINI MAP</div>
+    <div class="legend-row"><span class="dot"></span><span>Your position</span></div>
+    <div class="legend-row"><span class="dash"></span><span>Route to target</span></div>
+    <div class="legend-row"><span class="dot gold"></span><span>Destination</span></div>
+  </div>
+
+  <!-- DESTINATION -->
+  <div id="destination" class="panel guide-callout">
+    <div class="pin-icon">📍</div>
+    <div>
+      <div class="label-title" style="color:var(--gold)">DESTINATION</div>
+      <div class="label-sub">Reach this point</div>
+    </div>
+  </div>
+
+
+
+  <!-- MOVEMENT -->
+  <div id="movementInfo" class="panel guide-callout">
+    <div class="move-icon-box">✥</div>
+    <div>
+      <div class="label-title">MOVEMENT</div>
+      <div class="label-sub">Use joystick to control the boat</div>
+    </div>
+  </div>
+
+  <div id="joystick">
+    <span class="j-arrow j-up">▲</span>
+    <span class="j-arrow j-down">▼</span>
+    <span class="j-arrow j-left">‹</span>
+    <span class="j-arrow j-right">›</span>
+    <div id="stick"></div>
+  </div>
+
+  <!-- ACTION BUTTONS: BOOST (⚡), DOLPHIN (🐬), KICK (🥊) -->
+  <div id="btnBoost" class="control-btn" title="اندفاع سريع (Space)" style="font-size:28px;display:flex;align-items:center;justify-content:center;user-select:none;">
+    ⚡
+  </div>
+  <div id="speedInfo" class="control-info panel guide-callout">
+    <div class="btn-icon-mini">⚡</div>
+    <div>
+      <div class="label-title">اندفاع (BOOST)</div>
+      <div class="label-sub">تسارع فائق عبر الأمواج (Space)</div>
+    </div>
+  </div>
+
+  <div id="btnDolphin" class="control-btn" title="رفيق الدلفين (R)" style="font-size:28px;display:none;align-items:center;justify-content:center;user-select:none;">
+    🐬
+  </div>
+  <div id="sailInfo" class="control-info panel guide-callout" style="display:none;">
+    <div class="btn-icon-mini">🐬</div>
+    <div>
+      <div class="label-title">الدلفين (DOLPHIN)</div>
+      <div class="label-sub">ركوب أو قفز بهلواني (R / C)</div>
+    </div>
+  </div>
+
+  <div id="btnKick" class="control-btn" title="ضربة الركل (F / E)" style="font-size:28px;display:flex;align-items:center;justify-content:center;user-select:none;">
+    🥊
+  </div>
+  <div id="slowInfo" class="control-info panel guide-callout">
+    <div class="btn-icon-mini">🥊</div>
+    <div>
+      <div class="label-title">ركل ودفاع (STRIKE)</div>
+      <div class="label-sub">صد هجوم القرش وإبعاده (F / E)</div>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div id="status">
+    NAVIGATION
+    <span class="speed" id="speedText">SPEED 1.0x</span>
+    <span id="sailState">DOLPHIN READY</span>
+  </div>
+</div>
+
+<div id="cinematicFlash" class="cinematic-flash"></div>
+
+<div id="stageBanner" class="stage-banner" style="display:none">
+  <div class="stage-banner-tag" id="stageBannerTag">المرحلة الأولى</div>
+  <div class="stage-banner-title" id="stageBannerTitle">شاطئ اللاغون الفيروزي 🌴</div>
+  <div class="stage-banner-sub" id="stageBannerSub">ابحث عن بريق القارورة التائهة في عرض البحر</div>
+</div>
+
+<div id="toast"></div>
+
+
+<div id="p" class="hide">
+  <b>طبقات البحر</b>
+  <label><input type="checkbox" checked data-i="0"> 1. محاكاة الأمواج</label>
+  <label><input type="checkbox" checked data-i="1"> 2. حقل المسافة (الشاطئ)</label>
+  <label><input type="checkbox" checked data-i="2"> 3. لون حسب العمق</label>
+  <label><input type="checkbox" checked data-i="3"> 4. الانكسار</label>
+  <label><input type="checkbox" checked data-i="4"> 5. الكاوستيكس</label>
+  <label><input type="checkbox" checked data-i="5"> 6. الزبد</label>
+  <label><input type="checkbox" checked data-i="6"> 7. التفاعل (المس الماء)</label>
+  <label><input type="checkbox" checked data-i="7"> 8. انعكاس السماء والشمس</label>
+  <small>البحر على اليمين والشاطئ على اليسار</small>
+</div>
+
+<div class="ov" id="ovStart">
+  <div class="card">
+    <div class="big">🍼</div>
+    <h1>KID OF THE SEA</h1>
+    <p class="sub">طفل يطارد قارورته الضائعة في بحر واسع، فيخسر قاربه ويكسب صديقاً، ويكتشف ما الذي كان يبحث عنه فعلاً.</p>
+    <ul>
+      <li>🕹️ تحرّك بالأسهم / WASD أو اسحب على الشاشة باللمس</li>
+      <li>⚡ اضغط زر الاندفاع <b>(Space أو ⚡)</b> لتسارع فائق واختراق الأمواج!</li>
+      <li>🥊 اضغط زر الضربة <b>(F أو 🥊)</b> لركل القرش المهاجم وصد أسنانه!</li>
+      <li>🐬 اتحد مع الدلفين الصديق <b>(R أو 🐬)</b> للركوب والقفز فوق المخاطر!</li>
+      <li>🪵 اجمع أخشاب الجزيرة لإعادة بناء قاربك والانطلاق نحو قارورتك!</li>
+    </ul>
+    <div id="loadBox" style="margin: 10px 0; width: 100%;">
+      <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #0b4a63; display: flex; justify-content: space-between;">
+        <span>جاري تجهيز البحر والموارد...</span>
+        <span id="loadTxt">0%</span>
+      </div>
+      <div style="background: rgba(0,0,0,0.12); height: 8px; border-radius: 6px; overflow: hidden;">
+        <div id="loadFill" style="background: linear-gradient(90deg, #06d6a0, #ffd166); height: 100%; width: 0%; transition: width 0.1s ease;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;width:100%;margin-top:14px">
+      <button class="btn" id="btnStart" style="opacity: 0.6; pointer-events: none; flex: 1.5; min-width: 180px; font-size: 17px; padding: 14px 20px; background: linear-gradient(135deg, #06d6a0, #00b894); box-shadow: 0 6px 0 #00875a, 0 8px 24px rgba(6, 214, 160, 0.4);">⛵ ابدأ المغامرة</button>
+      <button class="btn alt" id="btnSkipToGame" style="background: rgba(15, 23, 42, 0.06); border: 2px solid rgba(15, 23, 42, 0.15); color: #1e293b; font-weight: 800; font-size: 15px; flex: 1; min-width: 140px; box-shadow: 0 2px 6px rgba(0,0,0,0.06);" title="تخطي القصة وابدأ مباشرة">🎮 لعب مباشر</button>
+    </div>
+  </div>
+</div>
+
+<!-- In-Game Cinematic Nautical Story Prologue Cutscene Overlay (Clean Sea Frame Standard) -->
+<div class="ov hide" id="ovStory">
+  <div class="story-backdrop"></div>
+  <div class="story-vignette"></div>
+
+  <!-- Central Sea Frame Stage -->
+  <div class="story-stage">
+    <div class="story-frame-card" id="storyCardFrame">
+      <!-- Story Artwork Viewport (Behind the top parchment cutout) -->
+      <div class="story-viewport" id="mangaPanelWrap">
+        <img id="storyPanelImg" class="story-artwork-img" src="story images/02_Kid_of_the_Sea.png" alt="مشهد القصة">
+        <div class="story-fx-badge" id="mangaFxBadge"></div>
+      </div>
+
+      <!-- Nautical Transparent Sea Frame (Water splashes, Shells, Wooden Sign) -->
+      <img src="story_frame.png" class="story-frame-img" alt="إطار القصة البحري" draggable="false">
+
+      <!-- Story Narrative & Subtitles inside the Dark Blue Wooden Sign -->
+      <div class="story-text-plank" id="mangaNarrativeBox">
+        <div class="story-text-content">
+          <div class="story-narrative-ar" id="storyCaptionTextAr">كنت مع والدي. كان يوماً جميلاً... ما زلت أتذكر ابتسامته.</div>
+          <div class="story-narrative-en" id="storyCaptionTextEn">I was with my father. It was a good day... I remember his smile.</div>
+        </div>
+        <div class="story-controls">
+          <button class="story-btn-speaker" id="btnStorySpeaker" title="الصوت">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+          </button>
+          <button class="story-btn-next" id="btnStoryNext" title="التالي">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov hide" id="ovPause">
+  <div class="card">
+    <div class="big">⏸️</div>
+    <h1>استراحة قصيرة</h1>
+    <p class="sub">البحر ينتظرك يا بطل!</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px">
+      <button class="btn alt" id="btnResume">▶️ متابعة الإبحار</button>
+      <button class="btn" style="background:#546e7a;box-shadow:0 6px 0 #37474f" onclick="window.location.href='../MAIN MENU/index.html'">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov hide" id="ovLevelWin">
+  <div class="card">
+    <div class="big" id="lvlWinEmoji">🏝️</div>
+    <h1 id="lvlWinTitle">أكملت المرحلة ١!</h1>
+    <p class="sub" id="lvlWinSub">مكافأة اجتياز المرحلة: +١٠٠ نقطة ⭐ • استعادة +٢ قلوب ❤️</p>
+    <div class="score-line" id="lvlWinScore"></div>
+    <div id="lvlWinNextDesc" style="background:rgba(255,255,255,0.72);padding:10px 14px;border-radius:14px;margin:8px 0 16px;font-size:14px;font-weight:750;color:#0b4a63;line-height:1.5;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="btnNextLevel">⛵ الإبحار إلى المرحلة التالية ▶️</button>
+      <button class="btn" style="background:#546e7a;box-shadow:0 6px 0 #37474f" onclick="window.location.href='../MAIN MENU/index.html'">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov hide" id="ovWin">
+  <div class="card">
+    <div class="big">🌅</div>
+    <h1>استعدتَ قارورتك وعُدتَ إلى والدك!</h1>
+    <p class="sub">على الشاطئ البعيد، كان نور الأب يناديك... لا شيء في هذا البحر الواسع يستحق أن تضيع طريق العودة إلى من تحبهم!</p>
+    <div id="starsRow">⭐⭐⭐</div>
+    <div class="score-line" id="winScore"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="btnReplay1">🔄 خوض الرحلة من جديد (الفصل ١)</button>
+      <button class="btn" style="background:#546e7a;box-shadow:0 6px 0 #37474f" onclick="window.location.href='../MAIN MENU/index.html'">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov hide" id="ovBottleWin">
+  <div class="card" style="border: 2px solid #38bdf8; box-shadow: 0 16px 48px rgba(0,242,254,0.35);">
+    <div class="big" style="display:flex;justify-content:center;align-items:center;margin-bottom:8px">
+      <img src="bottle_sprite.png" style="width:80px;height:80px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(56,189,248,0.8))" alt="Baby Bottle">
+    </div>
+    <h1 style="color:#0284c7">استعدتَ قارورة الذكريات! 🍼🌅</h1>
+    <p class="sub">أمسكتَ بالقارورة أخيراً... ونظرت إلى الأفق فرأيت ضوء والدك يناديك من الشاطئ البعيد. استدرت عائداً بحضن الصديق الدلفين ودفء اللقاء!</p>
+    <div id="bottleStarsRow" style="font-size:24px;margin:8px 0">⭐⭐⭐⭐⭐</div>
+    <div class="score-line" id="bottleWinScore"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">
+      <button class="btn" id="btnBottleReplay" style="background:linear-gradient(135deg, #00f2fe, #4facfe);border:none;box-shadow:0 6px 0 #0284c7">🔄 مغامرة جديدة (الفصل ١)</button>
+      <button class="btn" style="background:#546e7a;box-shadow:0 6px 0 #37474f" onclick="window.location.href='../MAIN MENU/index.html'">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov hide" id="ovOver">
+  <div class="card">
+    <div class="big">💔</div>
+    <h1>انتهت القلوب!</h1>
+    <p class="sub">لا بأس يا بطل… كل بحّار يتعلّم من الأمواج!</p>
+    <div class="score-line" id="overScore"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="btnRetry">🔄 حاول من جديد</button>
+      <button class="btn" style="background:#546e7a;box-shadow:0 6px 0 #37474f" onclick="window.location.href='../MAIN MENU/index.html'">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript Core & Engine Modules -->
+<script src="js/config.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/shader.js"></script>
+<script src="js/state.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/entities/loot_island.js"></script>
+<script src="js/entities/islands.js"></script>
+<script src="js/entities/shark.js"></script>
+<script src="js/entities/dolphin.js"></script>
+<script src="js/entities/player.js"></script>
+<script src="js/input.js"></script>
+<script src="js/render.js"></script>
+<script src="js/story.js"></script>
+<script src="js/tutorial.js"></script>
+<script src="js/main.js"></script>
+<script src="js/hud_aaa.js"></script>
+</body>
+</html>
