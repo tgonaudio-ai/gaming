@@ -1,0 +1,195 @@
+/* ==========================================================================
+   TUTORIAL.CSS: AAA Action-Freeze Contextual FTUE & Diegetic Guide System
+   ========================================================================== */
+
+/* Fullscreen Frosted Bullet-Time Backdrop */
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(3, 20, 32, 0.72) 0%, rgba(1, 10, 16, 0.92) 85%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  direction: rtl;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tutorial-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Tutorial Action Card */
+.tutorial-card {
+  position: relative;
+  width: 90%;
+  max-width: 460px;
+  background: linear-gradient(145deg, rgba(6, 32, 48, 0.95), rgba(3, 18, 28, 0.98));
+  border: 1.5px solid rgba(97, 239, 255, 0.65);
+  border-radius: 28px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 223, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: scale(0.88) translateY(20px);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tutorial-overlay.active .tutorial-card {
+  transform: scale(1) translateY(0);
+}
+
+/* Category Badge */
+.tutorial-badge {
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffd24a;
+  background: rgba(255, 210, 74, 0.16);
+  border: 1px solid rgba(255, 210, 74, 0.4);
+  padding: 3px 14px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+/* Action Icon with Radial Shockwave */
+.tutorial-icon-wrap {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.tutorial-icon-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 223, 255, 0.28) 0%, rgba(0, 223, 255, 0.05) 70%, transparent 100%);
+  animation: tutorialIconPulse 2s ease-in-out infinite;
+}
+
+.tutorial-icon {
+  font-size: 44px;
+  filter: drop-shadow(0 0 14px rgba(0, 223, 255, 0.8));
+  z-index: 1;
+}
+
+@keyframes tutorialIconPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.18); opacity: 0.35; }
+}
+
+/* Title & Description */
+.tutorial-title {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 10px rgba(0, 223, 255, 0.5);
+  letter-spacing: 0.3px;
+}
+
+.tutorial-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #c7f2ff;
+  margin: 0 0 20px 0;
+  padding: 0 10px;
+  font-weight: 550;
+}
+
+/* Input Trigger Indicators (Keyboard Key + HUD Button) */
+.tutorial-input-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(0, 223, 255, 0.07);
+  border: 1px dashed rgba(97, 239, 255, 0.45);
+  border-radius: 18px;
+  margin-bottom: 20px;
+}
+
+.tutorial-key-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #1b3d54, #0d2230);
+  border: 1.5px solid #61efff;
+  border-radius: 8px;
+  padding: 4px 12px;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 13px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), 0 0 8px rgba(0, 223, 255, 0.4);
+}
+
+.tutorial-input-hint {
+  font-size: 12px;
+  color: #ffd24a;
+  font-weight: 750;
+}
+
+/* Action Button */
+.tutorial-confirm-btn {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 18px;
+  border: none;
+  background: linear-gradient(90deg, #00dfff, #0099ff);
+  color: #031c2b;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 223, 255, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.12s, box-shadow 0.2s, background 0.2s;
+}
+
+.tutorial-confirm-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 26px rgba(0, 223, 255, 0.7);
+}
+
+.tutorial-confirm-btn:active {
+  transform: scale(0.97);
+}
+
+/* Highlight Ring for HUD Elements being targeted */
+.tutorial-hud-highlight {
+  position: relative;
+  z-index: 100000 !important;
+  animation: tutorialTargetBeacon 1.2s ease-in-out infinite !important;
+}
+
+@keyframes tutorialTargetBeacon {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(255, 210, 74, 0.9), inset 0 0 15px rgba(255, 210, 74, 0.5);
+    border-color: #ffd24a !important;
+    transform: scale(1.04);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(0, 223, 255, 1), inset 0 0 25px rgba(0, 223, 255, 0.7);
+    border-color: #00dfff !important;
+    transform: scale(1.12);
+  }
+}

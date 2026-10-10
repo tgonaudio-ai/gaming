@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>KID OF THE SEA — فتى البحر</title>
+<style>
+:root {
+  --primary: #ffd166;
+  --primary-dark: #f59e0b;
+  --accent: #06d6a0;
+  --accent-blue: #118ab2;
+  --danger: #ef476f;
+  --bg-overlay: rgba(5, 23, 38, 0.45);
+  --glass-bg: rgba(6, 30, 48, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.22);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #061923;
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+}
+
+/* Background video container */
+.video-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+#transVideo {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 2;
+}
+
+#transVideo.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Subtle cinematic gradient overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(3, 16, 26, 0.12) 0%, rgba(3, 16, 26, 0.5) 75%, rgba(2, 10, 18, 0.85) 100%);
+}
+
+/* Top Bar Controls */
+.top-bar {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  left: max(18px, env(safe-area-inset-left));
+  z-index: 15;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.badge-version {
+  pointer-events: auto;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #a7d8ff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.top-actions {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.circle-btn {
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.circle-btn:hover {
+  transform: scale(1.1);
+  background: rgba(14, 60, 92, 0.85);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.circle-btn:active {
+  transform: scale(0.92);
+}
+
+/* =========================================================
+   LEFT-SIDE DISCOVERY MENU (Awesome Design)
+========================================================= */
+.discovery-container {
+  position: fixed;
+  left: max(20px, env(safe-area-inset-left));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 12;
+  width: 320px;
+  max-width: calc(100vw - 40px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  pointer-events: auto;
+}
+
+.discovery-container.closed {
+  transform: translateY(-50%) translateX(calc(-100% - 24px));
+}
+
+.discovery-card {
+  background: linear-gradient(165deg, rgba(8, 38, 58, 0.82) 0%, rgba(4, 20, 32, 0.9) 100%);
+  border: 1.8px solid rgba(255, 209, 102, 0.35);
+  border-radius: 26px;
+  padding: 18px 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), 0 0 25px rgba(255, 209, 102, 0.12);
+  backdrop-filter: blur(16px);
+  position: relative;
+}
+
+/* Floating Toggle Button (Always visible on left edge) */
+.discovery-toggle-tab {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%) translateX(10px);
+  cursor: pointer;
+  border: 1.5px solid rgba(255, 209, 102, 0.5);
+  background: linear-gradient(135deg, rgba(14, 55, 84, 0.95), rgba(6, 28, 44, 0.95));
+  backdrop-filter: blur(12px);
+  color: #ffe699;
+  font-weight: 900;
+  font-size: 14px;
+  padding: 12px 14px;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 6px 6px 20px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.2s, background 0.2s, color 0.2s;
+}
+
+.discovery-toggle-tab:hover {
+  transform: translateY(-50%) translateX(14px);
+  background: linear-gradient(135deg, #18608f, #0b3d60);
+  color: #fff;
+}
+
+.discovery-toggle-tab span.disc-text {
+  writing-mode: vertical-rl;
+  letter-spacing: 2px;
+  font-size: 12px;
+}
+
+.disc-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.disc-badge-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.disc-badge-title .icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ff9f43, #ff5252);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.35);
+}
+
+.disc-badge-title h3 {
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.disc-badge-title small {
+  font-size: 11px;
+  color: #a7d8ff;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+
+/* Tabs */
+.disc-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.disc-tab-btn {
+  flex: 1;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 7px 4px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.disc-tab-btn.active {
+  background: linear-gradient(135deg, #2ec4b6, #118ab2);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(46, 196, 182, 0.35);
+}
+
+/* Tab Panels */
+.disc-panel {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.disc-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.showcase-preview {
+  position: relative;
+  width: 100%;
+  height: 125px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(14, 80, 115, 0.5), rgba(3, 20, 32, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.showcase-preview img {
+  max-width: 85%;
+  max-height: 80%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+  transition: transform 0.3s ease;
+}
+
+.showcase-preview:hover img {
+  transform: scale(1.08);
+}
+
+.showcase-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffd166;
+}
+
+.showcase-info h4 {
+  font-size: 15px;
+  font-weight: 900;
+  color: #ffe699;
+  margin-bottom: 4px;
+}
+
+.showcase-info p {
+  font-size: 12px;
+  color: #c9e4f5;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #9ac2d9;
+}
+
+.stat-item b {
+  color: #fff;
+  font-weight: 800;
+}
+
+/* =========================================================
+   MAIN UI (RIGHT SIDE - Leaves center boat clear)
+========================================================= */
+.main-content {
+  position: fixed;
+  right: max(40px, env(safe-area-inset-right));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0;
+  text-align: right;
+  width: auto;
+  max-width: 440px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.main-content.fade-out {
+  opacity: 0;
+  transform: translateY(-50%) scale(1.05);
+  pointer-events: none;
+}
+
+/* Title Branding */
+.title-wrap {
+  margin-bottom: 22px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  animation: floatTitle 3.5s ease-in-out infinite;
+}
+
+@keyframes floatTitle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.sub-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255,209,102,0.25), rgba(6,214,160,0.25));
+  border: 1px solid rgba(255, 209, 102, 0.5);
+  color: #ffe699;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  backdrop-filter: blur(8px);
+}
+
+.game-title {
+  font-size: clamp(34px, 4.8vw, 54px);
+  font-weight: 950;
+  line-height: 1.15;
+  background: linear-gradient(180deg, #ffffff 15%, #ffe699 55%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.7)) drop-shadow(0 1px 3px rgba(0,0,0,0.9));
+  letter-spacing: -0.5px;
+}
+
+.title-en {
+  font-size: clamp(13px, 1.8vw, 17px);
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: rgba(220, 240, 255, 0.85);
+  margin-top: 4px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+/* Menu Buttons */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 290px;
+  max-width: 340px;
+}
+
+.btn-menu {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 20px;
+  padding: 14px 28px;
+  border-radius: 40px;
+  color: #fff;
+  background: var(--glass-bg);
+  backdrop-filter: blur(14px);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: transform 0.16s ease, background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-menu::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+  transition: left 0.6s ease;
+}
+
+.btn-menu:hover::before {
+  left: 100%;
+}
+
+.btn-menu:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: rgba(14, 55, 84, 0.85);
+  border-color: rgba(255, 255, 255, 0.45);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.btn-menu:active {
+  transform: translateY(2px) scale(0.97);
+}
+
+/* Primary Play Button */
+.btn-menu.primary {
+  background: linear-gradient(135deg, #ff9f43 0%, #ff5252 100%);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  font-size: 23px;
+  padding: 17px 32px;
+  box-shadow: 0 8px 0 #b32d2e, 0 14px 30px rgba(255, 82, 82, 0.45);
+}
+
+.btn-menu.primary:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 0 #b32d2e, 0 18px 36px rgba(255, 82, 82, 0.6);
+}
+
+.btn-menu.primary:active {
+  transform: translateY(5px) scale(0.98);
+  box-shadow: 0 2px 0 #b32d2e, 0 6px 16px rgba(0,0,0,0.4);
+}
+
+/* Skip transition button */
+#btnSkip {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: none;
+  cursor: pointer;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: rgba(6, 28, 44, 0.85);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-weight: 900;
+  font-size: 17px;
+  padding: 10px 26px;
+  border-radius: 30px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.05); }
+}
+
+/* Modal Window */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(3, 16, 26, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: linear-gradient(165deg, #0e2a38 0%, #071720 100%);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 28px;
+  padding: 28px 24px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  transform: scale(0.9);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-overlay.open .modal-card {
+  transform: scale(1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 12px;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-close {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 26px;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.modal-close:hover {
+  color: #ff5252;
+  transform: scale(1.15);
+}
+
+.modal-body {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #d8ecf8;
+  text-align: right;
+}
+
+.control-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 10px 14px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+
+.control-icon {
+  font-size: 26px;
+  width: 40px;
+  text-align: center;
+}
+
+.control-text b {
+  color: #fff;
+  display: block;
+}
+
+.control-text span {
+  font-size: 13px;
+  color: #9ac2d9;
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: rgba(255,255,255,0.2);
+  transition: .3s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(24px); }
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .discovery-container {
+    width: 290px;
+  }
+}
+
+@media (max-width: 768px) {
+  .discovery-container {
+    left: 12px;
+  }
+}
+
+@media (max-width: 500px) {
+  .game-title { font-size: 34px; }
+  .btn-menu { font-size: 18px; padding: 13px 22px; }
+  .btn-menu.primary { font-size: 20px; padding: 15px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Video Background -->
+<div class="video-wrap">
+  <video id="bgVideo" autoplay loop muted playsinline preload="auto">
+    <source src="BG-MENU.mp4" type="video/mp4">
+  </video>
+  <video id="transVideo" playsinline preload="auto">
+    <source src="TRANSITION-TOPLAY.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- Vignette overlay -->
+<div class="overlay"></div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="badge-version">
+    <span>🏝️</span>
+    <span>إصدار المغامرة v2.0</span>
+  </div>
+  <div class="top-actions">
+    <button class="circle-btn" id="btnAudio" aria-label="Toggle Audio" title="صوت">🔊</button>
+    <button class="circle-btn" id="btnFullscreen" aria-label="Fullscreen" title="شاشة كاملة">⛶</button>
+  </div>
+</div>
+
+<!-- =========================================================
+     LEFT SIDE DISCOVERY MENU
+========================================================= -->
+<aside class="discovery-container" id="discoveryMenu">
+  <div class="discovery-card">
+    <!-- Toggle tab on drawer edge -->
+    <div class="discovery-toggle-tab" id="btnToggleDisc" title="إخفاء / إظهار دليل الاستكشاف">
+      <span>🧭</span>
+      <span class="disc-text">استكشاف</span>
+    </div>
+
+    <!-- Header -->
+    <div class="disc-head">
+      <div class="disc-badge-title">
+        <div class="icon-box">🧭</div>
+        <div>
+          <h3>دليل الاستكشاف</h3>
+          <small>DISCOVER THE WORLD</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="disc-tabs">
+      <button class="disc-tab-btn active" data-tab="shark">🦈 القرش</button>
+      <button class="disc-tab-btn" data-tab="islands">🏝️ الجزر</button>
+      <button class="disc-tab-btn" data-tab="hero">🚤 البطل</button>
+      <button class="disc-tab-btn" data-tab="loot">💎 الكنوز</button>
+    </div>
+
+    <!-- Tab 1: Shark -->
+    <div class="disc-panel active" id="tab-shark">
+      <div class="showcase-preview">
+        <img src="../SHARK/MOVE/MOVE0370.webp" alt="القرش">
+        <span class="showcase-tag" style="color:#ff6b6b; border-color:rgba(255,107,107,0.4)">⚠️ مفترس الأعماق</span>
+      </div>
+      <div class="showcase-info">
+        <h4>القرش الأبيض المفترس</h4>
+        <p>يتربص تحت سطح البحر بتأثير الأعماق، وينقض بدوران 360° ورذاذ مائي عند الاقتراب!</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-item"><span>الحركة:</span> <b>360° 🔄</b></div>
+        <div class="stat-item"><span>الخطر:</span> <b style="color:#ff6b6b">مميت 💀</b></div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Islands -->
+    <div class="disc-panel" id="tab-islands">
+      <div class="showcase-preview">
+        <img src="../ISLAND/island_topdown_1.webp" alt="جزيرة">
+        <span class="showcase-tag">🏝️ وجهة المغامرة</span>
+      </div>
+      <div class="showcase-info">
+        <h4>جزر الكنز والشواطئ</h4>
+        <p>شواطئ فيروزية ذات أمواج انسيابية متلاطمة. احذر من الاصطدام بالصخور لتفادي الضرر.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-item"><span>الأمواج:</span> <b>انسيابية 🌊</b></div>
+        <div class="stat-item"><span>الهدف:</span> <b>الكنز 🏆</b></div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Hero -->
+    <div class="disc-panel" id="tab-hero">
+      <div class="showcase-preview">
+        <img src="../MOVE/0001.webp" alt="القارب">
+        <span class="showcase-tag" style="color:#06d6a0; border-color:rgba(6,214,160,0.4)">⛵ البطل الصغير</span>
+      </div>
+      <div class="showcase-info">
+        <h4>قارب التجديف والفتى</h4>
+        <p>قارب خشبي سريع المناورة، يتحكم فيه الفتى بمجدافين لتفادي الأخطار وجمع الكنوز.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-item"><span>الصحة:</span> <b>5 قلوب ❤️</b></div>
+        <div class="stat-item"><span>التحكم:</span> <b>WASD / لمس 🕹️</b></div>
+      </div>
+    </div>
+
+    <!-- Tab 4: Loot -->
+    <div class="disc-panel" id="tab-loot">
+      <div class="showcase-preview" style="font-size:46px;">
+        <span>📦✨</span>
+        <span class="showcase-tag" style="color:#ffd166; border-color:rgba(255,209,102,0.4)">⭐ نقاط وجوائز</span>
+      </div>
+      <div class="showcase-info">
+        <h4>صناديق الكنز الغارقة</h4>
+        <p>صناديق خشبية عائمة تطفو وسط الأمواج، اجمعها لرفع رصيدك وتحقيق تقييم 3 نجوم!</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-item"><span>المكافأة:</span> <b>+10 ⭐</b></div>
+        <div class="stat-item"><span>التقييم:</span> <b>3 نجوم 🌟</b></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Menu UI -->
+<main class="main-content" id="mainUI">
+  <div class="title-wrap">
+    <div class="sub-tag">⛵ رحلة إلى جزيرة الكنز</div>
+    <h1 class="game-title">KID OF THE SEA</h1>
+    <div class="title-en">فتى البحر — مغامرة الجزيرة</div>
+  </div>
+
+  <nav class="menu-buttons">
+    <button class="btn-menu primary" id="btnPlay">
+      <span>⛵</span>
+      <span>ابدأ المغامرة</span>
+    </button>
+    <button class="btn-menu" id="btnBook" onclick="window.location.href='../LEVEL/book.html'" style="background: linear-gradient(135deg, rgba(255, 209, 102, 0.25), rgba(245, 158, 11, 0.35)); border-color: rgba(255, 209, 102, 0.6); color: #ffe89e;">
+      <span>📖</span>
+      <span>كتاب القصة التفاعلي</span>
+    </button>
+    <button class="btn-menu" id="btnControls">
+      <span>🕹️</span>
+      <span>طريقة اللعب</span>
+    </button>
+    <button class="btn-menu" id="btnSettings">
+      <span>⚙️</span>
+      <span>الإعدادات</span>
+    </button>
+    <button class="btn-menu" id="btnCredits">
+      <span>🌟</span>
+      <span>عن اللعبة</span>
+    </button>
+  </nav>
+</main>
+
+<!-- Skip Button for transition -->
+<button id="btnSkip">تخطي المشهد ⏭️</button>
+
+<!-- Modal: How to Play -->
+<div class="modal-overlay" id="modalControls">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">🕹️ طريقة اللعب والتحكم</div>
+      <button class="modal-close" data-close="modalControls">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="control-item">
+        <div class="control-icon">⌨️</div>
+        <div class="control-text">
+          <b>الأسهم / WASD</b>
+          <span>حرّك القارب في جميع الاتجاهات للتجديف والإبحار.</span>
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">📱</div>
+        <div class="control-text">
+          <b>عصا التحكم اللمسية (Joystick)</b>
+          <span>المس واسحب على الشاشة لتحريك القارب بسلاسة.</span>
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">🔍</div>
+        <div class="control-text">
+          <b>عجلة الفأرة (Zoom)</b>
+          <span>قرّب وأبعد الكاميرا لتشاهد محيط البحر والجزر القادمة.</span>
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">📦</div>
+        <div class="control-text">
+          <b>اجمع الصناديق الذهبية</b>
+          <span>احصل على النقاط واقترب من جزيرة الكنز في الشرق.</span>
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">⚡</div>
+        <div class="control-text">
+          <b>الاندفاع السريع (Turbo / Dash)</b>
+          <span>اضغط مفتاح المسافة (Space) أو Shift أو زر ⚡ لتسارع مضاعف والهروب من القرش!</span>
+        </div>
+      </div>
+      <div class="control-item">
+        <div class="control-icon">🦈</div>
+        <div class="control-text">
+          <b>احذر من هجمات القروش!</b>
+          <span>القروش تتعقبك بدوران 360 درجة وتنقض بشراسة.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Settings -->
+<div class="modal-overlay" id="modalSettings">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ الإعدادات</div>
+      <button class="modal-close" data-close="modalSettings">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-row">
+        <span>المؤثرات الصوتية (SFX)</span>
+        <label class="switch">
+          <input type="checkbox" id="chkAudio" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <span>محاكاة الأمواج عالية الدقة (WebGL)</span>
+        <label class="switch">
+          <input type="checkbox" id="chkGpu" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <span>اهتزاز الشاشة عند الاصطدام (Screen Shake)</span>
+        <label class="switch">
+          <input type="checkbox" id="chkShake" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Credits -->
+<div class="modal-overlay" id="modalCredits">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">🌟 عن اللعبة</div>
+      <button class="modal-close" data-close="modalCredits">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align:center; padding:10px 0;">
+      <p style="font-size:18px; font-weight:800; color:#ffe699; margin-bottom:8px;">⛵ مغامرة القارب الصغير</p>
+      <p style="color:#a7d8ff; margin-bottom:14px;">BOAT KID — ALL-IN-ONE WEB ADVENTURE</p>
+      <p style="font-size:14px; color:#d8ecf8; line-height:1.8;">
+        تم تطوير اللعبة بمحرك رسومي هجين يجمع بين قوة WebGL لمحاكاة مياه البحر الواقعية و Canvas 2D لكائنات القارب، الجزر، وأسماك القرش التفاعلية، مع مؤثرات صوتية تخليقية بالكامل عبر Web Audio API.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const bgVideo = document.getElementById("bgVideo");
+const transVideo = document.getElementById("transVideo");
+const mainUI = document.getElementById("mainUI");
+const discoveryMenu = document.getElementById("discoveryMenu");
+const btnToggleDisc = document.getElementById("btnToggleDisc");
+const btnPlay = document.getElementById("btnPlay");
+const btnSkip = document.getElementById("btnSkip");
+const btnAudio = document.getElementById("btnAudio");
+const btnFullscreen = document.getElementById("btnFullscreen");
+
+/* Audio synthesizer for menu sounds */
+let audioCtx = null;
+let soundEnabled = true;
+
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+function playTone(freq1, freq2, duration, type="sine", vol=0.18) {
+  if (!soundEnabled) return;
+  try {
+    initAudio();
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq1, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq2), t + duration);
+    gain.gain.setValueAtTime(vol, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + duration + 0.05);
+  } catch (_) {}
+}
+
+const sHover = () => playTone(540, 720, 0.08, "triangle", 0.08);
+const sClick = () => playTone(440, 880, 0.14, "sine", 0.18);
+const sPlay = () => {
+  [440, 554, 659, 880].forEach((f, i) => {
+    setTimeout(() => playTone(f, f * 1.2, 0.22, "sine", 0.22), i * 90);
+  });
+};
+
+/* Attach hover and click sound to buttons */
+document.querySelectorAll(".btn-menu, .circle-btn, .disc-tab-btn").forEach(btn => {
+  btn.addEventListener("mouseenter", sHover);
+  btn.addEventListener("click", () => {
+    if (btn !== btnPlay) sClick();
+  });
+});
+
+/* Left Side Discovery Menu Tab Switching */
+const discTabs = document.querySelectorAll(".disc-tab-btn");
+const discPanels = document.querySelectorAll(".disc-panel");
+
+discTabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    discTabs.forEach(t => t.classList.remove("active"));
+    discPanels.forEach(p => p.classList.remove("active"));
+    tab.classList.add("active");
+    const targetPanel = document.getElementById("tab-" + tab.dataset.tab);
+    if (targetPanel) targetPanel.classList.add("active");
+  });
+});
+
+/* Toggle Discovery Menu Drawer */
+btnToggleDisc.addEventListener("click", () => {
+  discoveryMenu.classList.toggle("closed");
+});
+
+/* Modal management */
+function openModal(id) {
+  document.getElementById(id).classList.add("open");
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove("open");
+}
+
+document.getElementById("btnControls").onclick = () => openModal("modalControls");
+document.getElementById("btnSettings").onclick = () => openModal("modalSettings");
+document.getElementById("btnCredits").onclick = () => openModal("modalCredits");
+
+document.querySelectorAll(".modal-close").forEach(btn => {
+  btn.onclick = () => closeModal(btn.dataset.close);
+});
+
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) overlay.classList.remove("open");
+  });
+});
+
+/* Fullscreen toggle */
+btnFullscreen.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    btnFullscreen.textContent = "⛶";
+  } else {
+    document.exitFullscreen().catch(()=>{});
+    btnFullscreen.textContent = "⛶";
+  }
+};
+
+/* Sound toggle */
+btnAudio.onclick = () => {
+  soundEnabled = !soundEnabled;
+  btnAudio.textContent = soundEnabled ? "🔊" : "🔇";
+  document.getElementById("chkAudio").checked = soundEnabled;
+};
+
+document.getElementById("chkAudio").onchange = (e) => {
+  soundEnabled = e.target.checked;
+  btnAudio.textContent = soundEnabled ? "🔊" : "🔇";
+};
+
+/* Start Game & Transition Video Sequence */
+let transitioning = false;
+
+function launchGame() {
+  window.location.href = "../LEVEL/game.html";
+}
+
+btnPlay.onclick = () => {
+  if (transitioning) return;
+  transitioning = true;
+  sPlay();
+
+  // Hide UI smoothly
+  mainUI.classList.add("fade-out");
+  discoveryMenu.classList.add("closed");
+  btnSkip.style.display = "block";
+
+  // Attempt to play transition video
+  transVideo.classList.add("active");
+  transVideo.currentTime = 0;
+  
+  const playPromise = transVideo.play();
+  if (playPromise !== undefined) {
+    playPromise.then(() => {
+      // Transition video started successfully
+      transVideo.onended = () => {
+        launchGame();
+      };
+    }).catch(err => {
+      console.warn("Transition autoplay prevented, launching game directly", err);
+      setTimeout(launchGame, 600);
+    });
+  } else {
+    transVideo.onended = () => {
+      launchGame();
+    };
+  }
+
+  // Fallback safety timeout if video stalls
+  setTimeout(() => {
+    if (transitioning) launchGame();
+  }, 10500);
+};
+
+btnSkip.onclick = () => {
+  launchGame();
+};
+
+/* Ensure bg video plays automatically on load */
+window.addEventListener("DOMContentLoaded", () => {
+  bgVideo.play().catch(() => {
+    window.addEventListener("pointerdown", () => bgVideo.play(), { once: true });
+  });
+});
+</script>
+</body>
+</html>

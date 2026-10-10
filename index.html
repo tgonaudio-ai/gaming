@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>قارورة الحليب</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="vignette"></div><div id="flash"></div>
+  <div class="panel hud-vitals">
+    <div class="portrait"><img src="assets/KID_WALK/0000.webp" alt=""></div>
+    <div class="bars">
+      <div class="bar-row"><label>الشجاعة</label><div class="bar courage"><i id="courageFill"></i></div></div>
+      <div class="bar-row" id="breathRow"><label>النَّفَس</label><div class="bar breath"><i id="breathFill"></i></div></div>
+      <div class="meta"><span>✦ <b id="memCount">0</b> ذكريات</span><span id="noiseTag" class="noise">ضجيج</span></div>
+    </div>
+  </div>
+  <div class="hud-top-right">
+    <div class="panel chapter"><small id="chapSub"></small><b id="chapName"></b></div>
+    <div class="panel minimap"><canvas id="mini" width="220" height="150"></canvas></div>
+    <div class="hud-btns"><button id="btnMute" aria-label="الصوت">🔊</button><button id="btnPause" aria-label="إيقاف">❚❚</button></div>
+  </div>
+  <div class="panel objectives"><h4>المهمة</h4><ul id="objList"></ul></div>
+  <div id="threatArrow"></div>
+  <div id="subtitle"><b id="subWho"></b><p id="subText"></p></div>
+  <div id="toasts"></div>
+  <div id="prompt"></div>
+  <div class="abilities" id="abilities"></div>
+  <div class="touch" id="touch">
+    <div id="stick"><i id="knob"></i></div>
+    <div class="tbtns">
+      <button data-t="dash">〰</button><button data-t="lantern">✦</button><button data-t="whistle">◖</button>
+      <button data-t="dive" data-hold>◍</button><button data-t="harmony" data-hold>❂</button><button data-t="interact">●</button>
+    </div>
+  </div>
+</div>
+
+<div id="chapterCard" class="hidden"><small id="ccSub"></small><h2 id="ccName"></h2></div>
+
+<section id="loading" class="screen"><div class="load-box"><div class="moon"></div><h2>قارورة الحليب</h2><div class="load-bar"><i id="loadFill"></i></div><small id="loadTxt">جارٍ التحميل…</small></div></section>
+
+<section id="menu" class="screen hidden">
+  <video id="menuVideo" src="assets/menu/bg.mp4" muted loop playsinline preload="auto"></video>
+  <div class="menu-box">
+    <div class="moon"></div>
+    <h1>قارورة الحليب</h1>
+    <p class="tagline">ما سرقه البحر… كان ينقذه.</p>
+    <button class="btn primary" id="btnNew">ابدأ الرحلة</button>
+    <button class="btn" id="btnContinue">تابع من الفصل المحفوظ</button>
+    <div class="controls">
+      <h4>التحكّم</h4>
+      <div><kbd>WASD</kbd> / الأسهم حركة</div><div><kbd>Space</kbd> اندفاع</div><div><kbd>F</kbd> فانوس</div>
+      <div><kbd>Q</kbd> صدفة رنّانة</div><div><kbd>Shift</kbd> غطس (اضغط باستمرار)</div><div><kbd>E</kbd> تناغم / تفاعل</div>
+      <div><kbd>R</kbd> أعد سماع الأجراس</div><div><kbd>Esc</kbd> إيقاف</div>
+    </div>
+  </div>
+</section>
+
+<section id="cards" class="screen hidden">
+  <div class="cards-bg" id="cardsBg"></div>
+  <div class="story-frame" id="storyFrame">
+    <div class="win"><img id="cardImg" alt=""></div>
+    <img class="frame" src="assets/story/frame.webp" alt="">
+    <div class="cap"><b id="cardTitle"></b><p id="cardText"></p></div>
+  </div>
+  <div class="dots" id="cardDots"></div>
+  <div class="hint cards-hint">اضغط للمتابعة</div>
+  <button class="skip" id="btnSkip">تخطّي</button>
+</section>
+
+<section id="transition" class="screen hidden"><video id="trVideo" src="assets/menu/transition.mp4" playsinline preload="auto"></video><button class="skip" id="btnTrSkip">تخطّي</button></section>
+
+<section id="reward" class="screen hidden"><div class="modal">
+  <small>قدرة جديدة</small><div class="big-icon" id="rwIcon"></div><h2 id="rwName"></h2><p id="rwHint"></p><div class="keycap" id="rwKey"></div>
+  <button class="btn primary" id="btnRewardNext">تابع إلى الفصل التالي</button>
+</div></section>
+
+<section id="choice" class="screen hidden"><div class="modal">
+  <small>قلب المنارة</small><h2>القارورة بين يديك</h2>
+  <p>أبوك على حافة الضوء، والبحر يتألّم. ماذا تفعل يا نور؟</p>
+  <button class="btn primary" id="btnGive">أضعها في المنارة وأعيد النور للبحر</button>
+  <button class="btn" id="btnKeep">أحتفظ بها وأعود بسرعة</button>
+</div></section>
+
+<section id="ending" class="screen hidden"><video id="endVideo" src="assets/menu/bg.mp4" muted loop playsinline></video><div class="card-box"><canvas id="endCv" width="480" height="270"></canvas><h3 id="endTitle"></h3><p id="endText"></p><div class="hint" id="endHint">اضغط للمتابعة</div>
+  <div id="endBtns" class="hidden"><div class="badge" id="endBadge"></div><button class="btn primary" id="btnAgain">العب مجددًا</button><button class="btn" id="btnEndMenu">القائمة</button></div></div></section>
+
+<section id="pause" class="screen hidden"><div class="modal">
+  <h2>متوقف</h2>
+  <button class="btn primary" id="btnResume">استمر</button><button class="btn" id="btnRestart">أعد الفصل</button>
+  <button class="btn" id="btnPMute">الصوت: يعمل</button><button class="btn" id="btnPMenu">القائمة الرئيسية</button>
+</div></section>
+
+<script src="js/util.js"></script>
+<script src="js/manifest.js"></script>
+<script src="js/sprites.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/story.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/game.js"></script>
+<script src="js/render.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
